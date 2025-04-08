@@ -1,6 +1,5 @@
 package com.project.harpyja.service;
 
-
 import com.project.harpyja.model.User;
 import com.project.harpyja.repository.UserWithProjectKey;
 
@@ -13,6 +12,5 @@ public interface UserService {
     User findUserById(String userId);
     void deleteUser(String userId);
     UserWithProjectKey findUserWithProjectKeyByEmail(String email);
-    // etc., conforme sua necessidade
+    boolean emailExists(String email);
 }
-
