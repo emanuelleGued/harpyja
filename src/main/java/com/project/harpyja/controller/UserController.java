@@ -31,12 +31,37 @@ public class UserController {
     // POST /api/users
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
-        // Faz as mesmas validações que você fazia no Go code:
-        // se user.getName() == null, se user.getEmail() == null, se senha >= 8 chars etc.
+
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("O nome do usuário não pode ser vazio.");
+        }
+
+        // Validação: Verificar se o email é nulo, vazio ou inválido
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("O email do usuário não pode ser vazio.");
+        }
+        if (!isValidEmail(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("O email fornecido não tem um formato válido.");
+        }
+
+        // Validação: Verificar se a senha tem pelo menos 8 caracteres
+        if (user.getPassword() == null || user.getPassword().length() < 8) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("A senha deve ter pelo menos 8 caracteres.");
+        }
 
         // Supondo que tudo certo:
         User created = userService.createUser(user);
         return ResponseEntity.status(201).body(created);
+    }
+
+    private boolean isValidEmail(String email) {
+        // Validação simples do formato de email usando uma expressão regular
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
     }
 
     // DELETE /api/users/{id}
