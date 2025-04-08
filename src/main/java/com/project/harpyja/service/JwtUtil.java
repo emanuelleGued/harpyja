@@ -2,6 +2,7 @@ package com.project.harpyja.service;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -12,7 +13,9 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String secretKey = "chave-super-secreta-exemplo"; // Exemplo fixo
+    @Value("${jwt.secret}")
+    private String secretKey;
+
     // OU injete via @Value("${jwt.secret}") ou via JwtConfig
 
     /**
