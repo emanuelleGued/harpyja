@@ -13,6 +13,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests()  // Novo método para autorizar requisições
                 .requestMatchers("/api/users/**").permitAll()  // Permite acesso sem autenticação à rota /api/users
+                .requestMatchers("/api/auth/**").permitAll()  // Permite acesso sem autenticação à rota /api/users
                 .anyRequest().authenticated()  // Outras rotas exigem autenticação
                 .and()
                 .csrf().disable()  // Desabilita a proteção CSRF para APIs REST (não é necessária)
