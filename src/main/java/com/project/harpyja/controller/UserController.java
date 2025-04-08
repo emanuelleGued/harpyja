@@ -3,10 +3,10 @@ package com.project.harpyja.controller;
 import com.project.harpyja.model.User;
 import com.project.harpyja.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Exemplo de controller REST
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -32,6 +32,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
 
+        // Validação: Verificar se o nome é nulo ou vazio
         if (user.getName() == null || user.getName().trim().isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("O nome do usuário não pode ser vazio.");
@@ -47,19 +48,23 @@ public class UserController {
                     .body("O email fornecido não tem um formato válido.");
         }
 
+        // Verificar se já existe um usuário com o mesmo email
+        if (userService.emailExists(user.getEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Já existe um usuário registrado com este email.");
+        }
+
         // Validação: Verificar se a senha tem pelo menos 8 caracteres
         if (user.getPassword() == null || user.getPassword().length() < 8) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("A senha deve ter pelo menos 8 caracteres.");
         }
 
-        // Supondo que tudo certo:
         User created = userService.createUser(user);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     private boolean isValidEmail(String email) {
-        // Validação simples do formato de email usando uma expressão regular
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         return email.matches(emailRegex);
     }
@@ -78,4 +83,3 @@ public class UserController {
         return ResponseEntity.ok(updated);
     }
 }
-
