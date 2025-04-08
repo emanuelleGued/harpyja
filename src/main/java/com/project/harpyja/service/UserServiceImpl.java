@@ -17,7 +17,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // Exemplo de criação de usuário, com hashing ou não
     @Override
     public User createUser(User user) {
         // Gerar ID se for string/UUID manualmente:
@@ -31,6 +30,11 @@ public class UserServiceImpl implements UserService {
 
         User saved = userRepository.save(user);
         return saved;
+    }
+
+    @Override
+    public boolean emailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
     }
 
     // "updateEmailVerified(email string)"
@@ -71,4 +75,3 @@ public class UserServiceImpl implements UserService {
         return result;
     }
 }
-
