@@ -2,9 +2,11 @@ package com.project.harpyja.model.enums;
 
 
 public enum OrganizationStatus {
+
+    COMPLETE,
     ACTIVE,
     INACTIVE,
-    SUSPENDED
-    // etc...
+    SUSPENDED,
+    PENDING_VERIFICATION
 }
 

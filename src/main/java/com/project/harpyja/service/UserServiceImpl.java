@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -19,17 +20,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        // Gerar ID se for string/UUID manualmente:
-        user.setId(UUID.fromString(UUID.randomUUID().toString()));
-
-        // Exemplo de "hash" de senha (BCrypt, etc.); aqui só para ilustração:
+        user.setId(UUID.randomUUID()); // Gera UUID
+        // Exemplo de "hash" de senha (BCrypt, etc.)
         // user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         user.setEmailVerified(false);
-        user.setTermsAgreed(true); // conforme seu Go code
-
-        User saved = userRepository.save(user);
-        return saved;
+        user.setTermsAgreed(true); // conforme o Go code original
+        return userRepository.save(user);
     }
 
     @Override
@@ -37,14 +34,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    // "updateEmailVerified(email string)"
     @Override
     public User updateEmailVerified(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
         user.setEmailVerified(true);
-        // userRepository.save(user); -> save é chamado automaticamente ao final da transação
+        // Ao final da transação, o user será persistido
         return user;
     }
 
@@ -55,7 +50,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserById(String userId) {
-        // Se userId for string/UUID:
         return userRepository.findById(UUID.fromString(userId))
                 .orElseThrow(() -> new RuntimeException("User not found by ID"));
     }
@@ -67,11 +61,97 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserWithProjectKey findUserWithProjectKeyByEmail(String email) {
-        // Se você tiver o método de projeção no repositório:
         UserWithProjectKey result = userRepository.findUserWithProjectKeyByEmail(email);
         if (result == null) {
             throw new RuntimeException("No record found with project key for email: " + email);
         }
         return result;
     }
+
+    // =========================
+    // MÉTODOS EXTRAS PARA ONBOARDING
+    // =========================
+
+    /**
+     * Verifica se o e-mail já existe no sistema.
+     * Caso exista, lança uma exceção para bloquear o processo de onboarding.
+     */
+    public void validateUserEmailForOnboarding(String email) {
+        if (emailExists(email)) {
+            throw new RuntimeException("Email already exists");
+        }
+    }
+
+    /**
+     * Cria um usuário simplificado para o onboarding,
+     * podendo ter regras diferentes de createUser (nome opcional, etc.).
+     */
+    public User createUserForOnboarding(String email, String rawPassword) {
+        // Supondo que a lógica é quase a mesma do createUser, mas sem nome
+        User user = new User();
+        user.setId(UUID.randomUUID());
+        user.setEmail(email);
+
+        // Exemplo de hashing (se você tiver um passwordEncoder)
+        // user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setPassword(rawPassword);
+
+        user.setEmailVerified(false);
+        user.setTermsAgreed(false); // talvez false, já que ainda não concordou?
+
+        return userRepository.save(user);
+    }
+
+    /**
+     * Atualiza somente o nome de um usuário pelo ID (durante onboarding).
+     */
+    public User updateUserName(String userId, String newName) {
+        User user = findUserById(userId); // Reaproveitando método já existente
+        user.setName(newName);
+        // Ao final da transação, o user será salvo
+        return user;
+    }
+    // ==============================
+    // NOVOS MÉTODOS PARA EQUIVALÊNCIA AO GO CODE
+    // ==============================
+
+    /**
+     * Atualiza parcialmente o usuário, seguindo a lógica do Go:
+     * Se "updates.getName() != null", então atualiza; se "updates.getPassword() != null", então atualiza, etc.
+     */
+    @Override
+    public User updateUserService(String userId, User updates) {
+        User existingUser = findUserById(userId);
+
+        // Exemplo de partial update
+        if (updates.getName() != null) {
+            existingUser.setName(updates.getName());
+        }
+        if (updates.getPassword() != null && !updates.getPassword().isEmpty()) {
+            // Ex.: existingUser.setPassword(passwordEncoder.encode(updates.getPassword()));
+            existingUser.setPassword(updates.getPassword());
+        }
+        // Se tiver outros campos, você pode atualizar aqui:
+        // if (updates.isEmailVerified()) { existingUser.setEmailVerified(true); }
+
+        // Com @Transactional, a entidade é "dirty-checked" e salva automaticamente
+        return existingUser;
+    }
+
+    /**
+     * Equivalente ao "FindUserByEmailServiceOnboarding" do Go.
+     * Se o usuário existe ou err == nil, lança exceção de "EmailAlreadyExists".
+     * Caso contrário, retorna null.
+     */
+    @Override
+    public User findUserByEmailServiceOnboarding(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        // Se userOpt.isPresent() => e-mail já existe => erro
+        if (userOpt.isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+        // Retorna null se não existe
+        return null;
+    }
+
 }
