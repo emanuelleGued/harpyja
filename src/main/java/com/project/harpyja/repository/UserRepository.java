@@ -19,5 +19,4 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     WHERE u.email = :email
 """)
     UserWithProjectKey findUserWithProjectKeyByEmail(@Param("email") String email);
-
 }
