@@ -11,15 +11,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests()  // Novo método para autorizar requisições
+                .authorizeHttpRequests()
                 .requestMatchers("/api/users/**").permitAll()  // Permite acesso sem autenticação à rota /api/users
-                .requestMatchers("/api/auth/**").permitAll()  // Permite acesso sem autenticação à rota /api/users
-                .requestMatchers("/api/v2/videos/**").permitAll()  // Permite acesso sem autenticação à rota /api/users
+                .requestMatchers("/api/auth/**").permitAll()  // Permite acesso sem autenticação à rota /api/auth
+                .requestMatchers("/api/v2/videos/**").permitAll()  // Permite acesso sem autenticação à rota /api/v2/videos
+                .requestMatchers("/api/onboarding/intention").permitAll()  // Permite acesso sem autenticação à rota /api/onboarding/intention
                 .anyRequest().authenticated()  // Outras rotas exigem autenticação
                 .and()
-                .csrf().disable()  // Desabilita a proteção CSRF para APIs REST (não é necessária)
+                .csrf().disable()  // Desabilita a proteção CSRF para APIs REST
                 .httpBasic().disable();  // Desabilita autenticação básica HTTP (já que você usará JWT)
 
-        return http.build();  // Retorna a configuração do HttpSecurity
+        return http.build();
     }
 }
