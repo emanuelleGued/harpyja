@@ -14,8 +14,9 @@ O sistema deve permitir que organizações iniciem seu cadastro fornecendo e-mai
 1.  Sistema verifica a unicidade do e-mail.
 2.  Criptografa a senha fornecida pelo usuário.
 3.  Cria um novo registro de organização no sistema com o status inicial definido como `PENDING_VERIFICATION`.
-4.  Gera um token de confirmação único e com validade temporal de 24 horas.
-5.  Associa o token gerado ao registro da organização.
+4.  Nesse momento tambem eh gerado um usuario "ADMIN" e associado a organizacao
+5.  Gera um token de confirmação único e com validade temporal de 24 horas.
+6.  Associa o token gerado ao registro da organização.
 
 **Output:**
 
