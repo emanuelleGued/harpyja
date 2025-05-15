@@ -1,21 +1,22 @@
 package com.project.harpyja.model.nymphicus;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Action {
+    @JsonProperty("action")
     private String action;
+
+    @JsonProperty("targetTime")
     private String targetTime;
+
+    @JsonProperty("coordinates")
     private String coordinates;
 
-    public Action() {}
-
-    public Action(String action, String targetTime, String coordinates) {
-        this.action = action;
-        this.targetTime = targetTime;
-        this.coordinates = coordinates;
-    }
-
+    // Getters e Setters
     public String getAction() {
         return action;
     }
+
     public void setAction(String action) {
         this.action = action;
     }
@@ -23,6 +24,7 @@ public class Action {
     public String getTargetTime() {
         return targetTime;
     }
+
     public void setTargetTime(String targetTime) {
         this.targetTime = targetTime;
     }
@@ -30,6 +32,7 @@ public class Action {
     public String getCoordinates() {
         return coordinates;
     }
+
     public void setCoordinates(String coordinates) {
         this.coordinates = coordinates;
     }
