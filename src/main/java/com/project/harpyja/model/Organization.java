@@ -22,7 +22,7 @@ public class Organization {
     private LocalDateTime registrationDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(columnDefinition = "VARCHAR(20) CHECK (status IN ('COMPLETE', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING_VERIFICATION'))")
     private OrganizationStatus status;
 
     @Column(name = "business_size")
