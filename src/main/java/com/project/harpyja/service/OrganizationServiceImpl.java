@@ -2,6 +2,7 @@ package com.project.harpyja.service;
 
 import com.project.harpyja.model.Organization;
 import com.project.harpyja.repository.OrganizationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Autowired
     private OrganizationRepository organizationRepository;
 
+    @Transactional
     public Organization createOrganizationService(Organization organization) {
         // Gera um UUID para a organização (caso não esteja definido)
         organization.setId(UUID.fromString(UUID.randomUUID().toString()));

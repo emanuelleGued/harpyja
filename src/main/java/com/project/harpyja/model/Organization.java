@@ -22,21 +22,11 @@ public class Organization {
     private LocalDateTime registrationDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "VARCHAR(20) CHECK (status IN ('COMPLETE', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING_VERIFICATION'))")
+    @Column(length = 20, nullable = false)
     private OrganizationStatus status;
 
     @Column(name = "business_size")
     private String businessSize;
-
-    /**
-     * Caso queira manter a relação 1-para-1 com Address (como está descrito em Address.java):
-     * Neste caso, a entity Address controlaria a FK (com @JoinColumn(unique=true)).
-     * Você pode remover este campo e acessar `Address` via `address.getOrganization()`.
-     *
-     * MAS, se quiser que a Organization seja "dona" do relacionamento, você pode
-     * deixar a FK aqui. Então precisaria ajustar em Address para não usar @OneToOne
-     * ou usar `mappedBy`.
-     */
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects;
@@ -62,6 +52,7 @@ public class Organization {
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -69,6 +60,7 @@ public class Organization {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -76,6 +68,7 @@ public class Organization {
     public LocalDateTime getRegistrationDate() {
         return registrationDate;
     }
+
     public void setRegistrationDate(LocalDateTime registrationDate) {
         this.registrationDate = registrationDate;
     }
@@ -83,6 +76,7 @@ public class Organization {
     public OrganizationStatus getStatus() {
         return status;
     }
+
     public void setStatus(OrganizationStatus status) {
         this.status = status;
     }
@@ -90,6 +84,7 @@ public class Organization {
     public String getBusinessSize() {
         return businessSize;
     }
+
     public void setBusinessSize(String businessSize) {
         this.businessSize = businessSize;
     }
@@ -97,6 +92,7 @@ public class Organization {
     public List<Project> getProjects() {
         return projects;
     }
+
     public void setProjects(List<Project> projects) {
         this.projects = projects;
     }
@@ -104,6 +100,7 @@ public class Organization {
     public List<UserOrganization> getUsers() {
         return users;
     }
+
     public void setUsers(List<UserOrganization> users) {
         this.users = users;
     }

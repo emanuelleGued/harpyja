@@ -1,19 +1,17 @@
-package com.project.harpyja.service;
+package com.project.harpyja.service.user;
 
 import com.project.harpyja.model.User;
 import com.project.harpyja.repository.UserRepository;
 import com.project.harpyja.repository.UserWithProjectKey;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
 @Transactional
-public class UserServiceImpl implements UserService {
+public class UserServiceImplJPA implements UserService {
 
     @Autowired
     private UserRepository userRepository;
@@ -61,11 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserWithProjectKey findUserWithProjectKeyByEmail(String email) {
-        UserWithProjectKey result = userRepository.findUserWithProjectKeyByEmail(email);
-        if (result == null) {
-            throw new RuntimeException("No record found with project key for email: " + email);
-        }
-        return result;
+        return null;
     }
 
     // =========================
@@ -154,4 +148,8 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return Optional.empty();
+    }
 }
