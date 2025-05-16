@@ -1,6 +1,7 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +50,7 @@ public class Project {
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -56,6 +58,7 @@ public class Project {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -63,6 +66,7 @@ public class Project {
     public String getKey() {
         return key;
     }
+
     public void setKey(String key) {
         this.key = key;
     }
@@ -70,6 +74,7 @@ public class Project {
     public String getType() {
         return type;
     }
+
     public void setType(String type) {
         this.type = type;
     }
@@ -77,6 +82,7 @@ public class Project {
     public LocalDateTime getExpiration() {
         return expiration;
     }
+
     public void setExpiration(LocalDateTime expiration) {
         this.expiration = expiration;
     }
@@ -84,6 +90,7 @@ public class Project {
     public Organization getOrganization() {
         return organization;
     }
+
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }
@@ -91,6 +98,7 @@ public class Project {
     public List<UserProject> getUsers() {
         return users;
     }
+
     public void setUsers(List<UserProject> users) {
         this.users = users;
     }

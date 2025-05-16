@@ -1,4 +1,4 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import com.project.harpyja.model.enums.ProjectRole;
 import jakarta.persistence.*;
@@ -38,6 +38,7 @@ public class UserProject {
     public UserProjectId getId() {
         return id;
     }
+
     public void setId(UserProjectId id) {
         this.id = id;
     }
@@ -45,6 +46,7 @@ public class UserProject {
     public ProjectRole getRole() {
         return role;
     }
+
     public void setRole(ProjectRole role) {
         this.role = role;
     }
@@ -52,6 +54,7 @@ public class UserProject {
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -59,6 +62,7 @@ public class UserProject {
     public Project getProject() {
         return project;
     }
+
     public void setProject(Project project) {
         this.project = project;
     }

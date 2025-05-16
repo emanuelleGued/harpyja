@@ -1,7 +1,7 @@
 package com.project.harpyja.repository;
 
 
-import com.project.harpyja.model.UserOrganization;
+import com.project.harpyja.entity.UserOrganization;
 
 public interface UserOrganizationRepository {
 

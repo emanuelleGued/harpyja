@@ -1,4 +1,4 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import com.project.harpyja.model.enums.OrganizationStatus;
 import jakarta.persistence.*;

@@ -1,5 +1,4 @@
-package com.project.harpyja.dto;
-
+package com.project.harpyja.dto.response;
 
 import com.project.harpyja.entity.User;
 
@@ -10,9 +9,7 @@ public class VerifyEmailResponse {
     private String token;
     private String projectKey;
 
-    public VerifyEmailResponse() {
-    }
-
+    // Construtor
     public VerifyEmailResponse(String organizationId, String userId, User user, String token, String projectKey) {
         this.organizationId = organizationId;
         this.userId = userId;

@@ -1,6 +1,7 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity
@@ -35,6 +36,7 @@ public class Role {
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -42,6 +44,7 @@ public class Role {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -49,6 +52,7 @@ public class Role {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -56,6 +60,7 @@ public class Role {
     public String getType() {
         return type;
     }
+
     public void setType(String type) {
         this.type = type;
     }
@@ -63,6 +68,7 @@ public class Role {
     public String getDefaultProjectRoleId() {
         return defaultProjectRoleId;
     }
+
     public void setDefaultProjectRoleId(String defaultProjectRoleId) {
         this.defaultProjectRoleId = defaultProjectRoleId;
     }

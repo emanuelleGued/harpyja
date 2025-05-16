@@ -1,6 +1,7 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity
@@ -41,6 +42,7 @@ public class Address {
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -48,6 +50,7 @@ public class Address {
     public String getCountry() {
         return country;
     }
+
     public void setCountry(String country) {
         this.country = country;
     }
@@ -55,6 +58,7 @@ public class Address {
     public String getCity() {
         return city;
     }
+
     public void setCity(String city) {
         this.city = city;
     }
@@ -62,6 +66,7 @@ public class Address {
     public String getStreet() {
         return street;
     }
+
     public void setStreet(String street) {
         this.street = street;
     }
@@ -69,6 +74,7 @@ public class Address {
     public String getZip() {
         return zip;
     }
+
     public void setZip(String zip) {
         this.zip = zip;
     }
@@ -76,6 +82,7 @@ public class Address {
     public Organization getOrganization() {
         return organization;
     }
+
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }

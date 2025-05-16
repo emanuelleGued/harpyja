@@ -1,6 +1,7 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity
@@ -27,11 +28,11 @@ public class User {
     /**
      * Se quiser que o relacionamento com UserOrganization / UserProject seja bidirecional,
      * pode adicionar:
-     *  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-     *  private List<UserOrganization> organizations;
      *
-     *  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-     *  private List<UserProject> projects;
+     * @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+     * private List<UserOrganization> organizations;
+     * @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+     * private List<UserProject> projects;
      */
 
     public User() {
@@ -50,6 +51,7 @@ public class User {
     public UUID getId() {
         return id;
     }
+
     public void setId(UUID id) {
         this.id = id;
     }
@@ -57,6 +59,7 @@ public class User {
     public String getName() {
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -64,6 +67,7 @@ public class User {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -72,6 +76,7 @@ public class User {
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
@@ -79,6 +84,7 @@ public class User {
     public boolean isEmailVerified() {
         return emailVerified;
     }
+
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
     }
@@ -86,6 +92,7 @@ public class User {
     public boolean isTermsAgreed() {
         return termsAgreed;
     }
+
     public void setTermsAgreed(boolean termsAgreed) {
         this.termsAgreed = termsAgreed;
     }

@@ -1,6 +1,6 @@
 package com.project.harpyja.repository;
 
-import com.project.harpyja.model.Address;
+import com.project.harpyja.entity.Address;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;

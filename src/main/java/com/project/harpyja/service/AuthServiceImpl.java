@@ -2,7 +2,7 @@ package com.project.harpyja.service;
 
 import com.project.harpyja.dto.UserWithTokenDto;
 import com.project.harpyja.exception.CustomException;
-import com.project.harpyja.model.User;
+import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

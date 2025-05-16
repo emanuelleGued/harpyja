@@ -1,7 +1,7 @@
 package com.project.harpyja.dto;
 
 
-import com.project.harpyja.model.User;
+import com.project.harpyja.entity.User;
 
 public class UserWithTokenDto {
     private User user;
@@ -21,6 +21,7 @@ public class UserWithTokenDto {
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -28,6 +29,7 @@ public class UserWithTokenDto {
     public String getToken() {
         return token;
     }
+
     public void setToken(String token) {
         this.token = token;
     }
@@ -35,6 +37,7 @@ public class UserWithTokenDto {
     public String getProjectKey() {
         return projectKey;
     }
+
     public void setProjectKey(String projectKey) {
         this.projectKey = projectKey;
     }

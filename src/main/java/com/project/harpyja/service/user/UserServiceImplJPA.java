@@ -1,8 +1,9 @@
 package com.project.harpyja.service.user;
 
-import com.project.harpyja.model.User;
+import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.UserRepository;
 import com.project.harpyja.repository.UserWithProjectKey;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,11 +35,17 @@ public class UserServiceImplJPA implements UserService {
 
     @Override
     public User updateEmailVerified(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setEmailVerified(true);
-        // Ao final da transação, o user será persistido
-        return user;
+        // Encontra o usuário pelo email
+        User existingUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+
+        // Atualiza o campo
+        existingUser.setEmailVerified(true);
+
+        // Salva (não é estritamente necessário com JPA e @Transactional, mas explícito)
+        User updatedUser = userRepository.save(existingUser);
+
+        return updatedUser;
     }
 
     @Override
@@ -149,7 +156,8 @@ public class UserServiceImplJPA implements UserService {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return Optional.empty();
+    public User findUserByEmail(String email) throws EntityNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
     }
 }

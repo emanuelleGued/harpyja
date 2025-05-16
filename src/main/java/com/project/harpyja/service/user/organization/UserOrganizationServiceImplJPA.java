@@ -1,6 +1,6 @@
 package com.project.harpyja.service.user.organization;
 
-import com.project.harpyja.model.UserOrganization;
+import com.project.harpyja.entity.UserOrganization;
 import com.project.harpyja.repository.UserOrganizationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;

@@ -1,9 +1,11 @@
 package com.project.harpyja.service.user;
 
-import com.project.harpyja.model.User;
+import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.UserWithProjectKey;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -11,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Transactional
@@ -74,11 +75,18 @@ public class UserServiceImplJDBC implements UserService {
 
     @Override
     public User updateEmailVerified(String email) {
-        String updateSql = "UPDATE users SET email_verified = true WHERE email = ?";
-        jdbcTemplate.update(updateSql, email);
+        if (!emailExists(email)) {
+            throw new RuntimeException("User not found with email: " + email);
+        }
 
-        String selectSql = "SELECT * FROM users WHERE email = ?";
-        return jdbcTemplate.queryForObject(selectSql, userRowMapper, email);
+        String updateSql = "UPDATE users SET email_verified = true WHERE email = ?";
+        int updatedRows = jdbcTemplate.update(updateSql, email);
+
+        if (updatedRows == 0) {
+            throw new RuntimeException("Failed to update email verification status");
+        }
+
+        return findUserByEmail(email);
     }
 
     @Override
@@ -180,9 +188,28 @@ public class UserServiceImplJDBC implements UserService {
         return null;
     }
 
-    public Optional<User> findByEmail(String email) {
+    public User findByEmail(String email) {
+        return null;
+    }
+
+    @Override
+    public User findUserByEmail(String email) throws EntityNotFoundException {
         String sql = "SELECT * FROM users WHERE email = ?";
-        List<User> users = jdbcTemplate.query(sql, userRowMapper, email);
-        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+
+        try {
+            return jdbcTemplate.queryForObject(sql, new Object[]{email}, (rs, rowNum) -> {
+                User user = new User();
+                user.setId(UUID.fromString(rs.getString("id")));
+                user.setName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                user.setPassword(rs.getString("password"));
+                user.setEmailVerified(rs.getBoolean("email_verified"));
+                user.setTermsAgreed(rs.getBoolean("terms_agreed"));
+                // Mapeie outros campos conforme necessário
+                return user;
+            });
+        } catch (EmptyResultDataAccessException e) {
+            throw new EntityNotFoundException("User not found with email: " + email);
+        }
     }
 }

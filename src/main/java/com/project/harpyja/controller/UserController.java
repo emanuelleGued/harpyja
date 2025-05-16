@@ -1,6 +1,6 @@
 package com.project.harpyja.controller;
 
-import com.project.harpyja.model.User;
+import com.project.harpyja.entity.User;
 import com.project.harpyja.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

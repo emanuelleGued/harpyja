@@ -1,6 +1,6 @@
 package com.project.harpyja.service.user.organization;
 
-import com.project.harpyja.model.UserOrganization;
+import com.project.harpyja.entity.UserOrganization;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,7 +18,6 @@ public class UserOrganizationServiceImplJDBC implements UserOrganizationService 
     @Override
     @Transactional
     public void createUserOrganizationService(UserOrganization userOrg) {
-        // Verifica se a relação já existe
         if (existsByUserAndOrganization(userOrg.getId().getUserId(), userOrg.getId().getOrganizationId())) {
             throw new IllegalStateException("User-Organization relationship already exists");
         }

@@ -15,6 +15,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // CSRF deve vir primeiro
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/onboarding/intention").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/onboarding/verify/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v2/videos/**").permitAll()

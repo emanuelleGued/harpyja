@@ -1,7 +1,7 @@
 package com.project.harpyja.repository;
 
 
-import com.project.harpyja.model.Address;
+import com.project.harpyja.entity.Address;
 
 public interface AddressRepository {
 

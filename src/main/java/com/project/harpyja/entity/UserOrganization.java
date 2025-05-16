@@ -1,4 +1,4 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 
 import jakarta.persistence.*;
@@ -52,6 +52,7 @@ public class UserOrganization implements Serializable {
     public UserOrganizationId getId() {
         return id;
     }
+
     public void setId(UserOrganizationId id) {
         this.id = id;
     }
@@ -59,6 +60,7 @@ public class UserOrganization implements Serializable {
     public OrganizationRole getRole() {
         return role;
     }
+
     public void setRole(OrganizationRole role) {
         this.role = role;
     }
@@ -66,6 +68,7 @@ public class UserOrganization implements Serializable {
     public ProjectRole getDefaultProjectRole() {
         return defaultProjectRole;
     }
+
     public void setDefaultProjectRole(ProjectRole defaultProjectRole) {
         this.defaultProjectRole = defaultProjectRole;
     }
@@ -73,6 +76,7 @@ public class UserOrganization implements Serializable {
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -80,6 +84,7 @@ public class UserOrganization implements Serializable {
     public Organization getOrganization() {
         return organization;
     }
+
     public void setOrganization(Organization organization) {
         this.organization = organization;
     }

@@ -1,4 +1,4 @@
-package com.project.harpyja.model;
+package com.project.harpyja.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -28,6 +28,7 @@ public class UserProjectId implements Serializable {
     public UUID getUserId() {
         return userId;
     }
+
     public void setUserId(UUID userId) {
         this.userId = userId;
     }
@@ -35,6 +36,7 @@ public class UserProjectId implements Serializable {
     public UUID getProjectId() {
         return projectId;
     }
+
     public void setProjectId(UUID projectId) {
         this.projectId = projectId;
     }

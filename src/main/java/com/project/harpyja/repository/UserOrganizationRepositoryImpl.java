@@ -1,6 +1,6 @@
 package com.project.harpyja.repository;
 
-import com.project.harpyja.model.UserOrganization;
+import com.project.harpyja.entity.UserOrganization;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
