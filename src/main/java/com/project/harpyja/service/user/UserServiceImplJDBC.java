@@ -97,8 +97,16 @@ public class UserServiceImplJDBC implements UserService {
 
     @Override
     public User findUserById(String userId) {
-        String sql = "SELECT * FROM users WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, userRowMapper, userId);
+        try {
+            String sql = "SELECT * FROM users WHERE id = ?";
+            return jdbcTemplate.queryForObject(
+                    sql,
+                    new Object[]{UUID.fromString(userId)}, // Convertendo para UUID
+                    userRowMapper
+            );
+        } catch (EmptyResultDataAccessException e) {
+            throw new EntityNotFoundException("User not found with ID: " + userId);
+        }
     }
 
     @Override
@@ -111,10 +119,6 @@ public class UserServiceImplJDBC implements UserService {
     public UserWithProjectKey findUserWithProjectKeyByEmail(String email) {
         return null;
     }
-
-    // =========================
-    // MÉTODOS EXTRAS PARA ONBOARDING
-    // =========================
 
     @Override
     public void validateUserEmailForOnboarding(String email) {
@@ -151,29 +155,36 @@ public class UserServiceImplJDBC implements UserService {
         return findUserById(userId);
     }
 
-    // ==============================
-    // NOVOS MÉTODOS PARA EQUIVALÊNCIA AO GO CODE
-    // ==============================
-
     @Override
     public User updateUserService(String userId, User updates) {
-        User existingUser = findUserById(userId);
+        try {
+            User existingUser = findUserById(userId);
 
-        if (updates.getName() != null) {
-            existingUser.setName(updates.getName());
-            jdbcTemplate.update("UPDATE users SET name = ? WHERE id = ?",
-                    updates.getName(), userId);
+            boolean updated = false;
+
+            if (updates.getName() != null && !updates.getName().equals(existingUser.getName())) {
+                String updateNameSql = "UPDATE users SET name = ? WHERE id = ?";
+                jdbcTemplate.update(updateNameSql, updates.getName(), UUID.fromString(userId));
+                existingUser.setName(updates.getName());
+                updated = true;
+            }
+
+            if (updates.getPassword() != null && !updates.getPassword().isEmpty()) {
+                String updatePasswordSql = "UPDATE users SET password = ? WHERE id = ?";
+                jdbcTemplate.update(updatePasswordSql, updates.getPassword(), UUID.fromString(userId));
+                existingUser.setPassword(updates.getPassword());
+                updated = true;
+            }
+
+            if (!updated) {
+                throw new IllegalArgumentException("No valid fields provided for update");
+            }
+
+            return existingUser;
+
+        } catch (DataAccessException e) {
+            throw new RuntimeException("Database error while updating user: " + e.getMessage(), e);
         }
-
-        if (updates.getPassword() != null && !updates.getPassword().isEmpty()) {
-            existingUser.setPassword(updates.getPassword());
-            jdbcTemplate.update("UPDATE users SET password = ? WHERE id = ?",
-                    updates.getPassword(), userId);
-        }
-
-        // Adicione outros campos conforme necessário
-
-        return existingUser;
     }
 
     @Override

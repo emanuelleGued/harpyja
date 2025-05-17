@@ -2,6 +2,12 @@ package com.project.harpyja.dto.request;
 
 public class AccountRegisterRequest {
     private String userName;
+    private String organizationName;
+    private String businessSize;
+    private String country;
+    private String city;
+    private String street;
+    private String zip;
 
     public String getUserName() {
         return userName;
@@ -58,11 +64,4 @@ public class AccountRegisterRequest {
     public void setZip(String zip) {
         this.zip = zip;
     }
-
-    private String organizationName;
-    private String businessSize;
-    private String country;
-    private String city;
-    private String street;
-    private String zip;
 }

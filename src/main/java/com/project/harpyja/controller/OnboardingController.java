@@ -1,5 +1,6 @@
 package com.project.harpyja.controller;
 
+import com.project.harpyja.dto.request.AccountRegisterRequest;
 import com.project.harpyja.dto.request.IntentionAccountRegisterRequest;
 import com.project.harpyja.dto.response.AccountRegisterResponse;
 import com.project.harpyja.dto.response.VerifyEmailResponse;
@@ -12,6 +13,7 @@ import com.project.harpyja.model.enums.OrganizationRole;
 import com.project.harpyja.model.enums.OrganizationStatus;
 import com.project.harpyja.service.JwtUtil;
 import com.project.harpyja.service.PasswordUtil;
+import com.project.harpyja.service.onboarding.OnboardingService;
 import com.project.harpyja.service.organization.OrganizationService;
 import com.project.harpyja.service.user.UserService;
 import com.project.harpyja.service.user.organization.UserOrganizationService;
@@ -46,8 +48,8 @@ public class OnboardingController {
     @Autowired
     private EmailService emailService;
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    @Autowired
+    private OnboardingService onboardingService;
 
     /**
      * POST /api/onboarding/intention
@@ -151,6 +153,39 @@ public class OnboardingController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid or expired token");
+        }
+    }
+
+    @PostMapping("/complete-registration/{organization_id}/{user_id}")
+    public ResponseEntity<?> completeRegistration(
+            @PathVariable("organization_id") String organizationId,
+            @PathVariable("user_id") String userId,
+            @RequestBody AccountRegisterRequest accountRegister) {
+
+        try {
+            if (organizationId == null || organizationId.isEmpty()) {
+                return ResponseEntity.badRequest().body("organization_id is required");
+            }
+
+            if (userId == null || userId.isEmpty()) {
+                return ResponseEntity.badRequest().body("user_id is required");
+            }
+
+            if (accountRegister.getOrganizationName() == null || accountRegister.getOrganizationName().isEmpty()) {
+                return ResponseEntity.badRequest().body("Organization name is required");
+            }
+            if (accountRegister.getUserName() == null || accountRegister.getUserName().isEmpty()) {
+                return ResponseEntity.badRequest().body("User name is required");
+            }
+
+            onboardingService.processRegistration(organizationId, userId, accountRegister);
+
+            return ResponseEntity.noContent().build();
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error completing registration: " + e.getMessage());
         }
     }
 }
