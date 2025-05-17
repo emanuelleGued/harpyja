@@ -1,6 +1,5 @@
 package com.project.harpyja.controller;
 
-import com.project.harpyja.auth.Auth;
 import com.project.harpyja.dto.request.IntentionAccountRegisterRequest;
 import com.project.harpyja.dto.response.AccountRegisterResponse;
 import com.project.harpyja.dto.response.VerifyEmailResponse;
@@ -11,11 +10,11 @@ import com.project.harpyja.entity.UserOrganization;
 import com.project.harpyja.entity.UserOrganizationId;
 import com.project.harpyja.model.enums.OrganizationRole;
 import com.project.harpyja.model.enums.OrganizationStatus;
+import com.project.harpyja.service.JwtUtil;
+import com.project.harpyja.service.PasswordUtil;
 import com.project.harpyja.service.organization.OrganizationService;
 import com.project.harpyja.service.user.UserService;
 import com.project.harpyja.service.user.organization.UserOrganizationService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +38,7 @@ public class OnboardingController {
     private UserOrganizationService userOrgService;
 
     @Autowired
-    private Auth authService;
+    private JwtUtil jwtUtil;
 
     @Value("${app.development-mode}")
     private String appEnv;
@@ -75,13 +74,13 @@ public class OnboardingController {
             user.setId(UUID.randomUUID());
             user.setName(null); // perguntar a hugo
             user.setEmail(accountRegister.getEmail());
-            user.setPassword(accountRegister.getPassword()); // se tiver hash, coloque
+            user.setPassword(PasswordUtil.hashPassword(accountRegister.getPassword()));
             user.setEmailVerified(false);
             user.setTermsAgreed(false);
 
             User createdUser = userService.createUser(user);
 
-            String token = authService.generateTokenToVerifyEmail(
+            String token = jwtUtil.generateTokenToVerifyEmail(
                     accountRegister.getEmail(),
                     createdOrg.getId().toString(),
                     createdUser.getId().toString()
@@ -117,21 +116,14 @@ public class OnboardingController {
     @GetMapping("/verify/{token}")
     public ResponseEntity<?> verifyEmail(@PathVariable String token) {
         try {
-            // 1. Verifica se o token foi fornecido
             if (token == null || token.isEmpty()) {
                 throw new BadRequestException("Token is required");
             }
+            JwtUtil.VerifiedEmailToken verifiedToken = jwtUtil.verifyEmailToken(token);
 
-            // 2. Parse e validação do token
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            // 3. Extrai claims do token
-            String organizationId = claims.get("organizationId", String.class);
-            String userId = claims.get("userId", String.class);
-            String email = claims.get("email", String.class);
+            String email = verifiedToken.getEmail();
+            String organizationId = verifiedToken.getOrganizationId();
+            String userId = verifiedToken.getUserId();
 
             if (organizationId == null || userId == null) {
                 throw new BadRequestException("Failed to extract claims from token");
@@ -143,10 +135,8 @@ public class OnboardingController {
                 throw new BadRequestException("User not found");
             }
 
-            // 5. Gera novo token JWT para autenticação
-            String authToken = authService.generateAuthToken(foundUser);
+            String authToken = jwtUtil.generateAuthToken(foundUser);
 
-            // 6. Retorna resposta
             VerifyEmailResponse response = new VerifyEmailResponse(
                     organizationId,
                     userId,

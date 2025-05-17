@@ -1,7 +1,7 @@
 package com.project.harpyja.service.user;
 
 import com.project.harpyja.entity.User;
-import com.project.harpyja.repository.UserWithProjectKey;
+import com.project.harpyja.repository.user.UserWithProjectKey;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
@@ -33,4 +33,6 @@ public interface UserService {
     User findUserByEmailServiceOnboarding(String email);
 
     User findUserByEmail(String email) throws EntityNotFoundException;
+
+    User getAuthenticatedUserFromToken(String token);
 }

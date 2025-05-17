@@ -1,7 +1,7 @@
 package com.project.harpyja.service;
 
 import com.project.harpyja.entity.Address;
-import com.project.harpyja.repository.AddressRepository;
+import com.project.harpyja.repository.address.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

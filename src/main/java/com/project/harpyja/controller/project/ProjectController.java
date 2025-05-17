@@ -1,0 +1,146 @@
+package com.project.harpyja.controller.project;
+
+import com.project.harpyja.entity.*;
+import com.project.harpyja.model.enums.ProjectRole;
+import com.project.harpyja.service.JwtUtil;
+import com.project.harpyja.service.project.ProjectService;
+import com.project.harpyja.service.user.project.UserProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/projects")
+public class ProjectController {
+
+    private final ProjectService projectService;
+    private final UserProjectService userProjectService;
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public ProjectController(
+            ProjectService projectService,
+            UserProjectService userProjectService,
+            JwtUtil jwtUtil) {
+        this.projectService = projectService;
+        this.userProjectService = userProjectService;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @PostMapping("/create/{organizationId}")
+    public ResponseEntity<?> createProject(
+            @PathVariable String organizationId,
+            @RequestBody CreateProjectRequest createProjectRequest,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            // 1. Validar organizationId
+            if (organizationId == null || organizationId.isEmpty()) {
+                return ResponseEntity.badRequest().body("organization_id is required");
+            }
+
+            UUID orgId;
+            try {
+                orgId = UUID.fromString(organizationId);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body("Invalid organization_id format");
+            }
+
+            // 2. Validar corpo da requisição
+            if (createProjectRequest.getName() == null || createProjectRequest.getName().isEmpty()) {
+                return ResponseEntity.badRequest().body("Project name is required");
+            }
+
+            // 3. Extrair e validar token JWT
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is required and must be Bearer token");
+            }
+
+            String token = authHeader.substring(7);
+            if (!jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+
+            // 4. Extrair informações do usuário do token
+            String userId = jwtUtil.extractUserId(token);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
+            }
+
+            UUID userUuid;
+            try {
+                userUuid = UUID.fromString(userId);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user ID format in token");
+            }
+
+            // 5. Criar projeto
+            Project project = new Project();
+            project.setId(UUID.randomUUID());
+            project.setName(createProjectRequest.getName());
+            project.setType(createProjectRequest.getType());
+            project.setExpiration(LocalDateTime.now().plusDays(30)); // 30 dias de expiração
+            project.setKey(generateProjectKey());
+
+            Organization org = new Organization();
+            org.setId(orgId);
+            project.setOrganization(org);
+
+            Project createdProject = projectService.createProject(project);
+
+            // 6. Criar relação user-project
+            UserProjectId userProjectId = new UserProjectId();
+            userProjectId.setUserId(userUuid);
+            userProjectId.setProjectId(createdProject.getId());
+
+            UserProject userProject = new UserProject();
+            userProject.setId(userProjectId);
+            userProject.setRole(ProjectRole.ADMIN);
+
+            // Criar objetos User e Project mínimos para a relação
+            User user = new User();
+            user.setId(userUuid);
+            userProject.setUser(user);
+            userProject.setProject(createdProject);
+
+            userProjectService.createUserProject(userProject);
+
+            // 7. Retornar resposta
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    private String generateProjectKey() {
+        // Implemente sua lógica de geração de chave aqui
+        return "prj_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+    }
+
+    public static class CreateProjectRequest {
+        private String name;
+        private String type;
+
+        // Getters e Setters
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
+}

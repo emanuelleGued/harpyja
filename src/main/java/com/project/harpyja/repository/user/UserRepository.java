@@ -1,4 +1,4 @@
-package com.project.harpyja.repository;
+package com.project.harpyja.repository.user;
 
 import com.project.harpyja.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

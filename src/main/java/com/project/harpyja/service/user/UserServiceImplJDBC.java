@@ -1,7 +1,7 @@
 package com.project.harpyja.service.user;
 
 import com.project.harpyja.entity.User;
-import com.project.harpyja.repository.UserWithProjectKey;
+import com.project.harpyja.repository.user.UserWithProjectKey;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.dao.DataAccessException;
@@ -211,5 +211,10 @@ public class UserServiceImplJDBC implements UserService {
         } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("User not found with email: " + email);
         }
+    }
+
+    @Override
+    public User getAuthenticatedUserFromToken(String token) {
+        return null;
     }
 }

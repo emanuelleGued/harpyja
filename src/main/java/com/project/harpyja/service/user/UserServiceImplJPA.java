@@ -1,8 +1,9 @@
 package com.project.harpyja.service.user;
 
 import com.project.harpyja.entity.User;
-import com.project.harpyja.repository.UserRepository;
-import com.project.harpyja.repository.UserWithProjectKey;
+import com.project.harpyja.repository.user.UserRepository;
+import com.project.harpyja.repository.user.UserWithProjectKey;
+import com.project.harpyja.service.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ public class UserServiceImplJPA implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    private JwtUtil jwtUtil;
 
     @Override
     public User createUser(User user) {
@@ -159,5 +162,10 @@ public class UserServiceImplJPA implements UserService {
     public User findUserByEmail(String email) throws EntityNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+    }
+
+    public User getAuthenticatedUserFromToken(String token) {
+        String userId = jwtUtil.extractUserId(token.replace("Bearer ", ""));
+        return userRepository.findById(UUID.fromString(userId)).orElse(null);
     }
 }

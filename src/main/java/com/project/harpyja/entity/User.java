@@ -72,7 +72,6 @@ public class User {
         this.email = email;
     }
 
-    // Caso queira "ocultar" a senha em um retorno JSON, utilize @JsonIgnore ou similar
     public String getPassword() {
         return password;
     }
@@ -97,17 +96,10 @@ public class User {
         this.termsAgreed = termsAgreed;
     }
 
-
-    // Getters/Setters e construtores (omiti para brevidade)
-
-    // Exemplo de lógica para comparação de senhas
-    // (Você pode usar BCrypt, por exemplo, via Spring Security)
     public boolean comparePasswords(String rawPassword) {
-        // Exemplo básico sem hashing:
         return this.password != null && this.password.equals(rawPassword);
     }
 
-    // Se quiser “remover” a senha antes de enviar ao cliente
     public void sanitizePassword() {
         this.password = null;
     }
