@@ -1,5 +1,7 @@
 package com.project.harpyja.controller.project;
 
+import com.project.harpyja.dto.request.CreateProjectRequest;
+import com.project.harpyja.dto.response.CreateProjectResponse;
 import com.project.harpyja.entity.*;
 import com.project.harpyja.model.enums.ProjectRole;
 import com.project.harpyja.service.JwtUtil;
@@ -65,7 +67,6 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
             }
 
-            // 4. Extrair informações do usuário do token
             String userId = jwtUtil.extractUserId(token);
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
@@ -78,7 +79,6 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user ID format in token");
             }
 
-            // 5. Criar projeto
             Project project = new Project();
             project.setId(UUID.randomUUID());
             project.setName(createProjectRequest.getName());
@@ -92,7 +92,6 @@ public class ProjectController {
 
             Project createdProject = projectService.createProject(project);
 
-            // 6. Criar relação user-project
             UserProjectId userProjectId = new UserProjectId();
             userProjectId.setUserId(userUuid);
             userProjectId.setProjectId(createdProject.getId());
@@ -101,7 +100,6 @@ public class ProjectController {
             userProject.setId(userProjectId);
             userProject.setRole(ProjectRole.ADMIN);
 
-            // Criar objetos User e Project mínimos para a relação
             User user = new User();
             user.setId(userUuid);
             userProject.setUser(user);
@@ -109,8 +107,14 @@ public class ProjectController {
 
             userProjectService.createUserProject(userProject);
 
-            // 7. Retornar resposta
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+            CreateProjectResponse response = new CreateProjectResponse(
+                    createdProject.getId(),
+                    createdProject.getName(),
+                    createdProject.getKey(),
+                    createdProject.getType()
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -120,27 +124,5 @@ public class ProjectController {
     private String generateProjectKey() {
         // Implemente sua lógica de geração de chave aqui
         return "prj_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-    }
-
-    public static class CreateProjectRequest {
-        private String name;
-        private String type;
-
-        // Getters e Setters
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
     }
 }
