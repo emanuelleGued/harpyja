@@ -2,7 +2,11 @@ package com.project.harpyja.entity;
 
 import com.project.harpyja.model.enums.ProjectRole;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "user_project")
 public class UserProject {
@@ -34,36 +38,4 @@ public class UserProject {
         this.project = project;
     }
 
-    // Getters e Setters
-    public UserProjectId getId() {
-        return id;
-    }
-
-    public void setId(UserProjectId id) {
-        this.id = id;
-    }
-
-    public ProjectRole getRole() {
-        return role;
-    }
-
-    public void setRole(ProjectRole role) {
-        this.role = role;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
 }

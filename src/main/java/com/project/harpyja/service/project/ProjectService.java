@@ -38,10 +38,6 @@ public class ProjectService {
         return projectRepository.findAllByOrganizationId(organizationId);
     }
 
-    public List<Project> getUserProjects(UUID userId) {
-        return projectRepository.findProjectsByUserId(userId);
-    }
-
     public List<Project> getExpiringProjects(LocalDateTime date) {
         return projectRepository.findExpiringBefore(date);
     }
@@ -53,5 +49,9 @@ public class ProjectService {
 
     public boolean projectNameExistsInOrganization(String name, UUID organizationId) {
         return projectRepository.existsByNameAndOrganizationId(name, organizationId);
+    }
+
+    public List<Project> getUserProjects(UUID userId) {
+        return projectRepository.findProjectsByUserId(userId);
     }
 }

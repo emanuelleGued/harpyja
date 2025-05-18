@@ -1,11 +1,15 @@
 package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "projects")
 public class Project {
@@ -46,60 +50,4 @@ public class Project {
         this.users = users;
     }
 
-    // Getters e Setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public LocalDateTime getExpiration() {
-        return expiration;
-    }
-
-    public void setExpiration(LocalDateTime expiration) {
-        this.expiration = expiration;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
-
-    public List<UserProject> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<UserProject> users) {
-        this.users = users;
-    }
 }

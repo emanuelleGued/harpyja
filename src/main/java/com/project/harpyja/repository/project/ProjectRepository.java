@@ -36,8 +36,6 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
             @Param("name") String name,
             @Param("organizationId") UUID organizationId);
 
-    // Encontrar projetos onde o usuário tem acesso
-    @Query("SELECT p FROM Project p JOIN UserProject up ON p.id = up.id.projectId " +
-            "WHERE up.id.userId = :userId")
+    @Query("SELECT p FROM Project p JOIN p.users u WHERE u.user.id = :userId")
     List<Project> findProjectsByUserId(@Param("userId") UUID userId);
 }

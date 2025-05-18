@@ -18,16 +18,14 @@ public class UserServiceImplJPA implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
     private JwtUtil jwtUtil;
 
     @Override
     public User createUser(User user) {
-        user.setId(UUID.randomUUID()); // Gera UUID
-        // Exemplo de "hash" de senha (BCrypt, etc.)
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
-
+        user.setId(UUID.randomUUID());
         user.setEmailVerified(false);
-        user.setTermsAgreed(true); // conforme o Go code original
+        user.setTermsAgreed(true);
         return userRepository.save(user);
     }
 
@@ -91,13 +89,10 @@ public class UserServiceImplJPA implements UserService {
      * podendo ter regras diferentes de createUser (nome opcional, etc.).
      */
     public User createUserForOnboarding(String email, String rawPassword) {
-        // Supondo que a lógica é quase a mesma do createUser, mas sem nome
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setEmail(email);
 
-        // Exemplo de hashing (se você tiver um passwordEncoder)
-        // user.setPassword(passwordEncoder.encode(rawPassword));
         user.setPassword(rawPassword);
 
         user.setEmailVerified(false);
