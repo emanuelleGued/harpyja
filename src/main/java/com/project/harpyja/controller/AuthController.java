@@ -4,8 +4,8 @@ import com.project.harpyja.dto.LoginRequest;
 import com.project.harpyja.dto.UserWithTokenDto;
 import com.project.harpyja.dto.VerifyEmailResponse;
 import com.project.harpyja.exception.CustomException;
-import com.project.harpyja.service.AuthService;
-import com.project.harpyja.service.JwtUtil;
+import com.project.harpyja.service.auth.AuthService;
+import com.project.harpyja.service.auth.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -32,7 +32,6 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        // Validação simples (poderia usar Bean Validation, etc.)
         if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
             throw new CustomException("Email e senha são obrigatórios", 400);
         }

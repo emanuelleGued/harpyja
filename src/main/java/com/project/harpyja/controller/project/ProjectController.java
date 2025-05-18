@@ -4,7 +4,7 @@ import com.project.harpyja.dto.request.CreateProjectRequest;
 import com.project.harpyja.dto.response.CreateProjectResponse;
 import com.project.harpyja.entity.*;
 import com.project.harpyja.model.enums.ProjectRole;
-import com.project.harpyja.service.JwtUtil;
+import com.project.harpyja.service.auth.JwtUtil;
 import com.project.harpyja.service.project.ProjectService;
 import com.project.harpyja.service.user.project.UserProjectService;
 import org.springframework.beans.factory.annotation.Autowired;

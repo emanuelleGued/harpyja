@@ -3,7 +3,7 @@ package com.project.harpyja.service.user;
 import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.user.UserRepository;
 import com.project.harpyja.repository.user.UserWithProjectKey;
-import com.project.harpyja.service.JwtUtil;
+import com.project.harpyja.service.auth.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;

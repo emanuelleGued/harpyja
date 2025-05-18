@@ -16,6 +16,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/onboarding/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/session/**").permitAll()
                         .requestMatchers("/api/projects/**").permitAll()
                         .requestMatchers("/api/v2/videos/**").permitAll()
                         .requestMatchers("/error").permitAll() // <- ESSENCIAL para evitar 403 ao redirecionar erro

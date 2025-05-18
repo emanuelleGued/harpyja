@@ -5,7 +5,7 @@ import com.project.harpyja.entity.Address;
 import com.project.harpyja.entity.Organization;
 import com.project.harpyja.entity.User;
 import com.project.harpyja.model.enums.OrganizationStatus;
-import com.project.harpyja.service.AddressService;
+import com.project.harpyja.service.address.AddressService;
 import com.project.harpyja.service.organization.OrganizationService;
 import com.project.harpyja.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

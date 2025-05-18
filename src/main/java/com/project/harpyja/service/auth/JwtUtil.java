@@ -1,4 +1,4 @@
-package com.project.harpyja.service;
+package com.project.harpyja.service.auth;
 
 import com.project.harpyja.entity.User;
 import io.jsonwebtoken.*;

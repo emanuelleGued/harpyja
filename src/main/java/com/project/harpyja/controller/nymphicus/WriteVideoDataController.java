@@ -5,7 +5,7 @@ import com.project.harpyja.model.nymphicus.ActivityGestureLogs;
 import com.project.harpyja.model.nymphicus.ActivityGestureUtils;
 import com.project.harpyja.model.nymphicus.Device;
 import com.project.harpyja.model.nymphicus.Session;
-import com.project.harpyja.repository.nymphicus.SessionRepository;
+import com.project.harpyja.repository.nymphicus.session.SessionRepository;
 import com.project.harpyja.service.nymphicus.VideoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,9 +26,11 @@ public class WriteVideoDataController {
     private final VideoService videoService;
     private final ObjectMapper objectMapper;
 
-    public WriteVideoDataController(SessionRepository sessionRepository,
-                                    VideoService videoService,
-                                    ObjectMapper objectMapper) {
+    public WriteVideoDataController(
+            SessionRepository sessionRepository,
+            VideoService videoService,
+            ObjectMapper objectMapper
+    ) {
         this.sessionRepository = sessionRepository;
         this.videoService = videoService;
         this.objectMapper = objectMapper;

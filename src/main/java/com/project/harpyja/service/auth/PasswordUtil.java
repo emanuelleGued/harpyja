@@ -1,4 +1,4 @@
-package com.project.harpyja.service;
+package com.project.harpyja.service.auth;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

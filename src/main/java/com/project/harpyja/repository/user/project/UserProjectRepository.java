@@ -1,5 +1,6 @@
 package com.project.harpyja.repository.user.project;
 
+import com.project.harpyja.entity.Project;
 import com.project.harpyja.entity.UserProject;
 import com.project.harpyja.entity.UserProjectId;
 import com.project.harpyja.model.enums.ProjectRole;
@@ -41,4 +42,13 @@ public interface UserProjectRepository extends JpaRepository<UserProject, UserPr
     List<UserProject> findByUserIdAndRole(
             @Param("userId") UUID userId,
             @Param("role") ProjectRole role);
+
+    @Query("SELECT p.key FROM UserProject up JOIN up.project p WHERE up.id.userId = :userId")
+    List<String> findAllProjectKeysByUserId(@Param("userId") UUID userId);
+
+    @Query("SELECT up.project FROM UserProject up WHERE up.id.userId = :userId")
+    List<Project> findAllProjectsByUserId(@Param("userId") UUID userId);
+
+    @Query("SELECT p.key FROM UserProject up JOIN up.project p WHERE up.id.userId = :userId ORDER BY p.key DESC")
+    List<String> findProjectKeysByUserIdOrdered(@Param("userId") UUID userId);
 }
