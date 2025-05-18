@@ -1,9 +1,13 @@
 package com.project.harpyja.model.nymphicus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Setter
+@Getter
 public class ActivityGesture {
     @JsonProperty("activityName")
     private String activityName;
@@ -11,20 +15,4 @@ public class ActivityGesture {
     @JsonProperty("gestures")
     private List<Gesture> gestures;
 
-    // Getters e Setters
-    public String getActivityName() {
-        return activityName;
-    }
-
-    public void setActivityName(String activityName) {
-        this.activityName = activityName;
-    }
-
-    public List<Gesture> getGestures() {
-        return gestures;
-    }
-
-    public void setGestures(List<Gesture> gestures) {
-        this.gestures = gestures;
-    }
 }

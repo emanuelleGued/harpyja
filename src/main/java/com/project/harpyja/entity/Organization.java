@@ -2,11 +2,15 @@ package com.project.harpyja.entity;
 
 import com.project.harpyja.model.enums.OrganizationStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "organizations")
 public class Organization {
@@ -48,60 +52,4 @@ public class Organization {
         this.users = users;
     }
 
-    // Getters e Setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDateTime getRegistrationDate() {
-        return registrationDate;
-    }
-
-    public void setRegistrationDate(LocalDateTime registrationDate) {
-        this.registrationDate = registrationDate;
-    }
-
-    public OrganizationStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrganizationStatus status) {
-        this.status = status;
-    }
-
-    public String getBusinessSize() {
-        return businessSize;
-    }
-
-    public void setBusinessSize(String businessSize) {
-        this.businessSize = businessSize;
-    }
-
-    public List<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
-    }
-
-    public List<UserOrganization> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<UserOrganization> users) {
-        this.users = users;
-    }
 }

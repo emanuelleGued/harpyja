@@ -27,12 +27,10 @@ public class Project {
     @Column(name = "expiration")
     private LocalDateTime expiration;
 
-    // Indica a FK da Organization
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    // Relacionamento para tabela de associação UserProject
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProject> users;
 
@@ -49,5 +47,4 @@ public class Project {
         this.organization = organization;
         this.users = users;
     }
-
 }

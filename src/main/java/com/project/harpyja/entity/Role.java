@@ -1,13 +1,18 @@
 package com.project.harpyja.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "roles")
 public class Role {
 
+    // Getters e Setters
     @Id
     @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -32,44 +37,4 @@ public class Role {
         this.defaultProjectRoleId = defaultProjectRoleId;
     }
 
-    // Getters e Setters
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getDefaultProjectRoleId() {
-        return defaultProjectRoleId;
-    }
-
-    public void setDefaultProjectRoleId(String defaultProjectRoleId) {
-        this.defaultProjectRoleId = defaultProjectRoleId;
-    }
 }

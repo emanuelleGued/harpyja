@@ -1,9 +1,13 @@
 package com.project.harpyja.model.nymphicus;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 
+@Setter
+@Getter
 public class Session {
     private String id;
     private ActivityGestureLogs activities;
@@ -28,70 +32,6 @@ public class Session {
         this.status = status;
         this.createdAt = createdAt;
         this.key = key;
-        this.duration = duration;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public ActivityGestureLogs getActivities() {
-        return activities;
-    }
-
-    public void setActivities(ActivityGestureLogs activities) {
-        this.activities = activities;
-    }
-
-    public Device getDevice() {
-        return device;
-    }
-
-    public void setDevice(Device device) {
-        this.device = device;
-    }
-
-    public String getVideoUrl() {
-        return videoUrl;
-    }
-
-    public void setVideoUrl(String videoUrl) {
-        this.videoUrl = videoUrl;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(long duration) {
         this.duration = duration;
     }
 }

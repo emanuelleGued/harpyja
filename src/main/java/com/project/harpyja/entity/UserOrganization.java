@@ -5,13 +5,18 @@ import jakarta.persistence.*;
 
 import com.project.harpyja.model.enums.OrganizationRole;
 import com.project.harpyja.model.enums.ProjectRole;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "user_organization")
 public class UserOrganization implements Serializable {
 
+    // Getters e Setters
     @EmbeddedId
     private UserOrganizationId id;
 
@@ -48,45 +53,5 @@ public class UserOrganization implements Serializable {
         this.organization = organization;
     }
 
-    // Getters e Setters
-    public UserOrganizationId getId() {
-        return id;
-    }
-
-    public void setId(UserOrganizationId id) {
-        this.id = id;
-    }
-
-    public OrganizationRole getRole() {
-        return role;
-    }
-
-    public void setRole(OrganizationRole role) {
-        this.role = role;
-    }
-
-    public ProjectRole getDefaultProjectRole() {
-        return defaultProjectRole;
-    }
-
-    public void setDefaultProjectRole(ProjectRole defaultProjectRole) {
-        this.defaultProjectRole = defaultProjectRole;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Organization getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(Organization organization) {
-        this.organization = organization;
-    }
 }
 

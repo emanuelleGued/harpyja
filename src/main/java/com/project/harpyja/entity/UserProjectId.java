@@ -2,14 +2,19 @@ package com.project.harpyja.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
+@Setter
+@Getter
 @Embeddable
 public class UserProjectId implements Serializable {
 
+    // Getters e Setters + equals/hashCode
     @Column(name = "user_id")
     private UUID userId;
 
@@ -24,28 +29,10 @@ public class UserProjectId implements Serializable {
         this.projectId = projectId;
     }
 
-    // Getters e Setters + equals/hashCode
-    public UUID getUserId() {
-        return userId;
-    }
-
-    public void setUserId(UUID userId) {
-        this.userId = userId;
-    }
-
-    public UUID getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(UUID projectId) {
-        this.projectId = projectId;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserProjectId)) return false;
-        UserProjectId that = (UserProjectId) o;
+        if (!(o instanceof UserProjectId that)) return false;
         return Objects.equals(userId, that.userId) &&
                 Objects.equals(projectId, that.projectId);
     }
