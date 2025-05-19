@@ -63,7 +63,7 @@ public class OnboardingController {
 
             // 2. Cria Organization com status = PENDING_VERIFICATION
             Organization org = new Organization();
-            org.setId(UUID.randomUUID());
+            org.setId(UUID.randomUUID().toString());
             org.setName(null);
             org.setRegistrationDate(LocalDateTime.now());
             org.setStatus(OrganizationStatus.PENDING_VERIFICATION);
@@ -73,7 +73,7 @@ public class OnboardingController {
 
             // 3. Cria User com email/password, emailVerified=false
             User user = new User();
-            user.setId(UUID.randomUUID());
+            user.setId(UUID.randomUUID().toString());
             user.setName(null); // perguntar a hugo
             user.setEmail(accountRegister.getEmail());
             user.setPassword(PasswordUtil.hashPassword(accountRegister.getPassword()));
@@ -84,8 +84,8 @@ public class OnboardingController {
 
             String token = jwtUtil.generateTokenToVerifyEmail(
                     accountRegister.getEmail(),
-                    createdOrg.getId().toString(),
-                    createdUser.getId().toString()
+                    createdOrg.getId(),
+                    createdUser.getId()
             );
 
             //emailService.sendVerificationEmail(createdUser.getEmail(), token);
@@ -103,8 +103,8 @@ public class OnboardingController {
             userOrgService.createUserOrganizationService(userOrg);
 
             AccountRegisterResponse response = new AccountRegisterResponse(
-                    createdUser.getId().toString(),
-                    createdOrg.getId().toString(),
+                    createdUser.getId(),
+                    createdOrg.getId(),
                     token,
                     appEnv
             );

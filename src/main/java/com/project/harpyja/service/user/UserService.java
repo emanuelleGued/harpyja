@@ -1,7 +1,6 @@
 package com.project.harpyja.service.user;
 
 import com.project.harpyja.entity.User;
-import com.project.harpyja.repository.user.UserWithProjectKey;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
@@ -18,21 +17,11 @@ public interface UserService {
 
     void deleteUser(String userId);
 
-    UserWithProjectKey findUserWithProjectKeyByEmail(String email);
-
     boolean emailExists(String email);
-
-    void validateUserEmailForOnboarding(String email);
-
-    User createUserForOnboarding(String email, String rawPassword);
-
-    User updateUserName(String userId, String newName);
 
     User updateUserService(String userId, User updates);
 
     User findUserByEmailServiceOnboarding(String email);
 
     User findUserByEmail(String email) throws EntityNotFoundException;
-
-    User getAuthenticatedUserFromToken(String token);
 }

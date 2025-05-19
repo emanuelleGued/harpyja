@@ -1,4 +1,4 @@
-package com.project.harpyja.config.user.organization;
+package com.project.harpyja.factory.config.user.organization;
 
 import com.project.harpyja.service.user.organization.UserOrganizationService;
 import com.project.harpyja.service.user.organization.UserOrganizationServiceImplJDBC;

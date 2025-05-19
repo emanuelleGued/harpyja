@@ -11,6 +11,4 @@ public interface SessionRepository {
     List<Session> findByKey(String key);
 
     Session saveActionsToMongo(Session session);
-
-    void updateSessionStatusToError(String key);
 }

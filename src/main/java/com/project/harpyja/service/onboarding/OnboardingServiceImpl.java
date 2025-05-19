@@ -47,7 +47,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         // 4. Cria o address
         Address address = new Address();
-        address.setId(UUID.randomUUID());
+        address.setId(UUID.randomUUID().toString());
         address.setCountry(accountRegister.getCountry());
         address.setCity(accountRegister.getCity());
         address.setStreet(accountRegister.getStreet());

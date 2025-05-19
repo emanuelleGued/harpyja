@@ -1,4 +1,4 @@
-package com.project.harpyja.config.user;
+package com.project.harpyja.factory.config.user;
 
 import com.project.harpyja.service.user.UserServiceImplJDBC;
 import com.project.harpyja.service.user.UserServiceImplJPA;

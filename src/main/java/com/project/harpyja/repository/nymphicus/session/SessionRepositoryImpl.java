@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -44,12 +43,5 @@ public class SessionRepositoryImpl implements SessionRepository {
     @Override
     public Session saveActionsToMongo(Session session) {
         return mongoTemplate.insert(session, COLLECTION);
-    }
-
-    @Override
-    public void updateSessionStatusToError(String key) {
-        Query query = new Query(Criteria.where("key").is(key));
-        Update update = new Update().set("status", "Error");
-        mongoTemplate.updateFirst(query, update, Session.class, COLLECTION);
     }
 }

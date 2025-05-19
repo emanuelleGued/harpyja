@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/session")
@@ -49,14 +48,6 @@ public class SessionController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
             }
 
-            // Validar formato do UUID do usuário (opcional, dependendo do seu caso)
-            try {
-                UUID.fromString(userId);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user ID format in token");
-            }
-
-            // 3. Buscar sessões no banco de dados
             List<Session> sessions = sessionService.getSessionByKey(projectKey);
             return ResponseEntity.ok(sessions);
 

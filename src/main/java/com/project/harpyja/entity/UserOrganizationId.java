@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -15,15 +14,15 @@ import java.util.UUID;
 public class UserOrganizationId implements Serializable {
 
     @Column(name = "user_id")
-    private UUID userId;
+    private String userId;
 
     @Column(name = "organization_id")
-    private UUID organizationId;
+    private String organizationId;
 
     public UserOrganizationId() {
     }
 
-    public UserOrganizationId(UUID userId, UUID organizationId) {
+    public UserOrganizationId(String userId, String organizationId) {
         this.userId = userId;
         this.organizationId = organizationId;
     }

@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.project.harpyja.utils.HashGenerator.generateHashKey;
+
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
@@ -48,13 +50,6 @@ public class ProjectController {
                 return ResponseEntity.badRequest().body("organization_id is required");
             }
 
-            UUID orgId;
-            try {
-                orgId = UUID.fromString(organizationId);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body("Invalid organization_id format");
-            }
-
             // 2. Validar corpo da requisição
             if (createProjectRequest.getName() == null || createProjectRequest.getName().isEmpty()) {
                 return ResponseEntity.badRequest().body("Project name is required");
@@ -75,28 +70,21 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
             }
 
-            UUID userUuid;
-            try {
-                userUuid = UUID.fromString(userId);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user ID format in token");
-            }
-
             Project project = new Project();
-            project.setId(UUID.randomUUID());
+            project.setId(UUID.randomUUID().toString());
             project.setName(createProjectRequest.getName());
             project.setType(createProjectRequest.getType());
-            project.setExpiration(LocalDateTime.now().plusDays(30)); // 30 dias de expiração
-            project.setKey(generateProjectKey());
+            project.setExpiration(LocalDateTime.now().plusDays(30));
+            project.setKey(generateHashKey());
 
             Organization org = new Organization();
-            org.setId(orgId);
+            org.setId(organizationId);
             project.setOrganization(org);
 
             Project createdProject = projectService.createProject(project);
 
             UserProjectId userProjectId = new UserProjectId();
-            userProjectId.setUserId(userUuid);
+            userProjectId.setUserId(userId);
             userProjectId.setProjectId(createdProject.getId());
 
             UserProject userProject = new UserProject();
@@ -104,7 +92,7 @@ public class ProjectController {
             userProject.setRole(ProjectRole.ADMIN);
 
             User user = new User();
-            user.setId(userUuid);
+            user.setId(userId);
             userProject.setUser(user);
             userProject.setProject(createdProject);
 
@@ -124,15 +112,9 @@ public class ProjectController {
         }
     }
 
-    private String generateProjectKey() {
-        // Implemente sua lógica de geração de chave aqui
-        return "prj_" + UUID.randomUUID().toString().replace("-", "").substring(0, 16);
-    }
-
     @GetMapping("/my-projects")
     public ResponseEntity<?> getUserProjects(@RequestHeader("Authorization") String authHeader) {
         try {
-            // 1. Validar token JWT
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Authorization header is required and must be Bearer token");
@@ -148,22 +130,17 @@ public class ProjectController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
             }
 
-            UUID userUuid;
-            try {
-                userUuid = UUID.fromString(userId);
-            } catch (IllegalArgumentException e) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user ID format in token");
-            }
-
-            List<Project> projects = projectService.getUserProjects(userUuid);
+            List<Project> projects = projectService.getUserProjects(userId);
 
             List<UserProjectResponse> response = projects.stream()
                     .map(project -> {
+                        /*
                         ProjectRole role = project.getUsers().stream()
                                 .filter(up -> up.getUser().getId().equals(userUuid))
                                 .findFirst()
                                 .map(UserProject::getRole)
-                                .orElse(ProjectRole.VIEWER); // Default caso não encontre
+                                .orElse(ProjectRole.VIEWER);
+                         */
 
                         return new UserProjectResponse(
                                 project.getId(),
@@ -171,7 +148,7 @@ public class ProjectController {
                                 project.getKey(),
                                 project.getType(),
                                 project.getExpiration(),
-                                role
+                                null
                         );
                     })
                     .collect(Collectors.toList());

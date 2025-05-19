@@ -4,10 +4,11 @@ import com.project.harpyja.model.enums.OrganizationStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -17,7 +18,7 @@ public class Organization {
 
     @Id
     @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    private String id;
 
     @Column(length = 255)
     private String name;
@@ -32,6 +33,14 @@ public class Organization {
     @Column(name = "business_size")
     private String businessSize;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects;
 
@@ -41,7 +50,7 @@ public class Organization {
     public Organization() {
     }
 
-    public Organization(UUID id, String name, LocalDateTime registrationDate, OrganizationStatus status,
+    public Organization(String id, String name, LocalDateTime registrationDate, OrganizationStatus status,
                         String businessSize, List<Project> projects, List<UserOrganization> users) {
         this.id = id;
         this.name = name;
@@ -51,5 +60,4 @@ public class Organization {
         this.projects = projects;
         this.users = users;
     }
-
 }

@@ -7,24 +7,22 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
 @Setter
 @Getter
 @Embeddable
 public class UserProjectId implements Serializable {
 
-    // Getters e Setters + equals/hashCode
     @Column(name = "user_id")
-    private UUID userId;
+    private String userId;
 
     @Column(name = "project_id")
-    private UUID projectId;
+    private String projectId;
 
     public UserProjectId() {
     }
 
-    public UserProjectId(UUID userId, UUID projectId) {
+    public UserProjectId(String userId, String projectId) {
         this.userId = userId;
         this.projectId = projectId;
     }
@@ -42,4 +40,3 @@ public class UserProjectId implements Serializable {
         return Objects.hash(userId, projectId);
     }
 }
-

@@ -1,0 +1,30 @@
+package com.project.harpyja.service.project;
+
+import com.project.harpyja.entity.Project;
+import com.project.harpyja.repository.project.ProjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ProjectServiceImplJPA implements ProjectService {
+
+    private final ProjectRepository projectRepository;
+
+    @Autowired
+    public ProjectServiceImplJPA(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    @Transactional
+    public Project createProject(Project project) {
+        return projectRepository.save(project);
+    }
+
+    public List<Project> getUserProjects(String userId) {
+        return projectRepository.findProjectsByUserId(userId);
+    }
+}

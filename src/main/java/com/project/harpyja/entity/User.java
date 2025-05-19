@@ -3,8 +3,10 @@ package com.project.harpyja.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Setter
 @Getter
@@ -14,7 +16,7 @@ public class User {
 
     @Id
     @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    private String id;
 
     private String name;
 
@@ -29,10 +31,19 @@ public class User {
     @Column(name = "terms_agreed")
     private boolean termsAgreed;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public User() {
     }
 
-    public User(UUID id, String name, String email, String password, boolean emailVerified, boolean termsAgreed) {
+    public User(String id, String name, String email, String password,
+                boolean emailVerified, boolean termsAgreed) {
         this.id = id;
         this.name = name;
         this.email = email;

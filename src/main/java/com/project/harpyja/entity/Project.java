@@ -3,10 +3,11 @@ package com.project.harpyja.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Setter
 @Getter
@@ -16,7 +17,7 @@ public class Project {
 
     @Id
     @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    private String id;
 
     private String name;
 
@@ -34,10 +35,18 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserProject> users;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
     public Project() {
     }
 
-    public Project(UUID id, String name, String key, String type, LocalDateTime expiration,
+    public Project(String id, String name, String key, String type, LocalDateTime expiration,
                    Organization organization, List<UserProject> users) {
         this.id = id;
         this.name = name;

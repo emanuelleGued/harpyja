@@ -15,10 +15,8 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void createAddressService(Address address) {
-        // Gera novo ID (caso não esteja definido)
-        address.setId(UUID.fromString(UUID.randomUUID().toString()));
+        address.setId(UUID.randomUUID().toString());
 
-        // Chama repositório para persistir
         addressRepository.createAddressRepository(address);
     }
 }

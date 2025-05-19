@@ -4,7 +4,6 @@ import com.project.harpyja.dto.UserWithTokenDto;
 import com.project.harpyja.exception.CustomException;
 import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.user.UserRepository;
-import com.project.harpyja.service.user.project.UserProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +14,6 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-    @Autowired
-    private UserProjectService userProjectService;
 
     @Autowired
     public AuthServiceImpl(UserRepository userRepository, JwtUtil jwtUtil) {
@@ -39,9 +36,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = jwtUtil.generateAuthToken(user);
-
+        /*
         String key = userProjectService.getLastUserProjectKey(user.getId())
                 .orElse(null);
-        return new UserWithTokenDto(user, token, key);
+
+         */
+        return new UserWithTokenDto(user, token, null);
     }
 }

@@ -15,9 +15,8 @@ public class AddressRepositoryImpl implements AddressRepository {
 
     @Override
     public void createAddressRepository(Address address) {
-        // Se já não tiver ID, gerar
         if (address.getId() == null) {
-            address.setId(UUID.fromString(UUID.randomUUID().toString()));
+            address.setId(UUID.randomUUID().toString());
         }
         entityManager.persist(address);
     }

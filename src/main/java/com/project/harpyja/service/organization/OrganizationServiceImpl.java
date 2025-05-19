@@ -16,7 +16,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Transactional
     public Organization createOrganizationService(Organization organization) {
-        organization.setId(UUID.fromString(UUID.randomUUID().toString()));
+        organization.setId(UUID.randomUUID().toString());
         return organizationRepository.createOrganizationRepository(organization);
     }
 
@@ -26,7 +26,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     @Override
     public Organization findById(String id) {
-        return organizationRepository.findById(UUID.fromString(id))
+        return organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found with id: " + id));
     }
 }

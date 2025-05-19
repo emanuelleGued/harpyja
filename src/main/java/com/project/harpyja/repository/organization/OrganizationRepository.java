@@ -4,7 +4,6 @@ package com.project.harpyja.repository.organization;
 import com.project.harpyja.entity.Organization;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface OrganizationRepository {
 
@@ -21,8 +20,6 @@ public interface OrganizationRepository {
     /**
      * Busca a organização associada a determinado userID.
      */
-    Organization getOrganizationByUserID(String userID);
 
-    Optional<Organization> findById(UUID id);
-
+    Optional<Organization> findById(String id);
 }

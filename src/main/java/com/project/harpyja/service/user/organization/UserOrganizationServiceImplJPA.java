@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
-
 @Service
 @Primary
 public class UserOrganizationServiceImplJPA implements UserOrganizationService {
@@ -24,7 +22,7 @@ public class UserOrganizationServiceImplJPA implements UserOrganizationService {
     }
 
     @Override
-    public boolean existsByUserAndOrganization(UUID userId, UUID organizationId) {
+    public boolean existsByUserAndOrganization(String userId, String organizationId) {
         return false;
     }
 }
