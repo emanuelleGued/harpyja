@@ -2,9 +2,12 @@ package com.project.harpyja.controller.project;
 
 import com.project.harpyja.dto.request.CreateProjectRequest;
 import com.project.harpyja.dto.response.CreateProjectResponse;
+import com.project.harpyja.dto.response.ProjectDetailsResponse;
 import com.project.harpyja.dto.response.UserProjectResponse;
 import com.project.harpyja.entity.*;
 import com.project.harpyja.model.enums.ProjectRole;
+import com.project.harpyja.model.nymphicus.Session;
+import com.project.harpyja.repository.nymphicus.session.SessionRepositoryImpl;
 import com.project.harpyja.service.auth.JwtUtil;
 import com.project.harpyja.service.project.ProjectService;
 import com.project.harpyja.service.user.project.UserProjectService;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,15 +31,19 @@ public class ProjectController {
     private final ProjectService projectService;
     private final UserProjectService userProjectService;
     private final JwtUtil jwtUtil;
+    private final SessionRepositoryImpl sessionRepository;
+
 
     @Autowired
     public ProjectController(
             ProjectService projectService,
             UserProjectService userProjectService,
-            JwtUtil jwtUtil) {
+            JwtUtil jwtUtil,
+            SessionRepositoryImpl sessionRepository) {
         this.projectService = projectService;
         this.userProjectService = userProjectService;
         this.jwtUtil = jwtUtil;
+        this.sessionRepository = sessionRepository;
     }
 
     @PostMapping("/create/{organizationId}")
@@ -112,6 +120,11 @@ public class ProjectController {
         }
     }
 
+    /*
+    curl  -X GET http://localhost:8080/api/projects/my-projects \
+          -H "Authorization: Bearer SEU_TOKEN_AQUI" \
+          -H "Content-Type: application/json"
+     */
     @GetMapping("/my-projects")
     public ResponseEntity<?> getUserProjects(@RequestHeader("Authorization") String authHeader) {
         try {
@@ -158,6 +171,72 @@ public class ProjectController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error fetching user projects: " + e.getMessage());
+        }
+    }
+
+    /*
+    curl -X GET http://localhost:8080/api/projects/{projectId}/details \
+     -H "Authorization: Bearer seu_token_jwt_aqui" \
+     -H "Content-Type: application/json"
+     */
+    @GetMapping("/{projectId}/details")
+    public ResponseEntity<?> getProjectDetails(
+            @PathVariable String projectId,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Authorization header is required and must be Bearer token");
+            }
+
+            String token = authHeader.substring(7);
+            if (!jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            }
+
+            String userId = jwtUtil.extractUserId(token);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
+            }
+
+            Optional<Project> projectOpt = projectService.getProjectById(projectId);
+            if (projectOpt.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Project not found");
+            }
+
+            Project project = projectOpt.get();
+
+            boolean hasAccess = userProjectService.existsByUserIdAndProjectId(userId, projectId);
+            if (!hasAccess) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("User does not have access to this project");
+            }
+
+            ProjectRole userRole = userProjectService.findUserRoleInProject(userId, projectId)
+                    .orElse(ProjectRole.VIEWER);
+
+
+            List<Session> sessions = sessionRepository.findByKey(project.getKey());
+
+            ProjectDetailsResponse response = new ProjectDetailsResponse(
+                    project.getId(),
+                    project.getName(),
+                    project.getKey(),
+                    project.getType(),
+                    project.getExpiration(),
+                    userRole,
+                    sessions
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error fetching project details: " + e.getMessage());
         }
     }
 }

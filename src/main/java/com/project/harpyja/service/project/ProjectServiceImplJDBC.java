@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectServiceImplJDBC implements ProjectService {
@@ -29,5 +30,10 @@ public class ProjectServiceImplJDBC implements ProjectService {
     public List<Project> getUserProjects(String userId) {
         List<Project> projects = projectDAO.findProjectsByUserId(userId);
         return projects;
+    }
+
+    @Override
+    public Optional<Project> getProjectById(String projectId) {
+        return projectDAO.findById(projectId);
     }
 }

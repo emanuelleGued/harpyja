@@ -8,9 +8,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -36,10 +38,13 @@ public class ProjectRepositoryJDBC {
 
     public Project save(Project project) {
         try {
+            LocalDateTime now = LocalDateTime.now();
             project.setId(UUID.randomUUID().toString());
+            project.setCreatedAt(now);
+            project.setUpdatedAt(now);
 
-            String sql = "INSERT INTO projects (id, name, key, type, expiration, organization_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO projects (id, name, key, type, expiration, organization_id, created_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
             jdbcTemplate.update(sql,
                     project.getId(),
@@ -47,7 +52,9 @@ public class ProjectRepositoryJDBC {
                     project.getKey(),
                     project.getType(),
                     project.getExpiration(),
-                    project.getOrganization().getId());
+                    project.getOrganization().getId(),
+                    Timestamp.valueOf(project.getCreatedAt()),
+                    Timestamp.valueOf(project.getUpdatedAt()));
 
             return project;
         } catch (Exception e) {
@@ -67,6 +74,17 @@ public class ProjectRepositoryJDBC {
         } catch (DataAccessException e) {
             logger.error("Erro ao buscar projetos do usuário: {}", e.getMessage(), e);
             return Collections.emptyList();
+        }
+    }
+
+    public Optional<Project> findById(String projectId) {
+        String sql = "SELECT * FROM projects WHERE id = ?";
+        try {
+            Project project = jdbcTemplate.queryForObject(sql, projectRowMapper, projectId);
+            return Optional.ofNullable(project);
+        } catch (DataAccessException e) {
+            logger.error("Erro ao buscar projeto por ID: {}", e.getMessage(), e);
+            return Optional.empty();
         }
     }
 }

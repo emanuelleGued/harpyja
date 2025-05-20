@@ -12,7 +12,9 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Transactional
@@ -38,11 +40,14 @@ public class UserServiceImplJDBC implements UserService {
     @Override
     public User createUser(User user) {
         try {
+            LocalDateTime now = LocalDateTime.now();
             user.setEmailVerified(false);
             user.setTermsAgreed(true);
+            user.setCreatedAt(now);
+            user.setUpdatedAt(now);
 
-            String sql = "INSERT INTO users (id, name, email, password, email_verified, terms_agreed) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO users (id, name, email, password, email_verified, terms_agreed, created_at, updated_at) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
             jdbcTemplate.update(con -> {
                 PreparedStatement ps = con.prepareStatement(sql);
@@ -52,6 +57,8 @@ public class UserServiceImplJDBC implements UserService {
                 ps.setString(4, user.getPassword());
                 ps.setBoolean(5, user.isEmailVerified());
                 ps.setBoolean(6, user.isTermsAgreed());
+                ps.setTimestamp(7, Timestamp.valueOf(user.getCreatedAt()));  // Converter LocalDateTime para Timestamp
+                ps.setTimestamp(8, Timestamp.valueOf(user.getUpdatedAt()));  // Converter LocalDateTime para Timestamp
                 return ps;
             });
 
@@ -78,14 +85,22 @@ public class UserServiceImplJDBC implements UserService {
             throw new RuntimeException("User not found with email: " + email);
         }
 
-        String updateSql = "UPDATE users SET email_verified = true WHERE email = ?";
-        int updatedRows = jdbcTemplate.update(updateSql, email);
+        LocalDateTime now = LocalDateTime.now();
+        String updateSql = "UPDATE users SET email_verified = true, updated_at = ? WHERE email = ?";
+
+        int updatedRows = jdbcTemplate.update(updateSql,
+                Timestamp.valueOf(now),
+                email
+        );
 
         if (updatedRows == 0) {
             throw new RuntimeException("Failed to update email verification status");
         }
 
-        return findUserByEmail(email);
+        User updatedUser = findUserByEmail(email);
+        updatedUser.setUpdatedAt(now);
+
+        return updatedUser;
     }
 
     @Override
@@ -117,42 +132,34 @@ public class UserServiceImplJDBC implements UserService {
     @Override
     public User updateUserService(String userId, User updates) {
         try {
-            logger.info("Iniciando atualização do usuário ID: {}", userId);
             User existingUser = findUserById(userId);
-            logger.debug("Usuário encontrado para atualização: {}", existingUser);
-
+            LocalDateTime now = LocalDateTime.now();
             boolean updated = false;
 
             if (updates.getName() != null && !updates.getName().equals(existingUser.getName())) {
-                logger.debug("Atualizando nome para: {}", updates.getName());
-                String updateNameSql = "UPDATE users SET name = ? WHERE id = ?";
-                int rowsUpdated = jdbcTemplate.update(updateNameSql, updates.getName(), userId);
-                logger.debug("Linhas afetadas na atualização do nome: {}", rowsUpdated);
+                String updateNameSql = "UPDATE users SET name = ?, updated_at = ? WHERE id = ?";
+                jdbcTemplate.update(updateNameSql, updates.getName(), Timestamp.valueOf(now), userId);
                 existingUser.setName(updates.getName());
                 updated = true;
             }
 
             if (updates.getPassword() != null && !updates.getPassword().isEmpty()) {
-                logger.debug("Atualizando senha");
-                String updatePasswordSql = "UPDATE users SET password = ? WHERE id = ?";
-                int rowsUpdated = jdbcTemplate.update(updatePasswordSql, updates.getPassword(), userId);
-                logger.debug("Linhas afetadas na atualização da senha: {}", rowsUpdated);
+                String updatePasswordSql = "UPDATE users SET password = ?, updated_at = ? WHERE id = ?";
+                jdbcTemplate.update(updatePasswordSql, updates.getPassword(), Timestamp.valueOf(now), userId);
                 existingUser.setPassword(updates.getPassword());
                 updated = true;
             }
 
             if (!updated) {
-                logger.warn("Nenhum campo válido fornecido para atualização");
                 throw new IllegalArgumentException("No valid fields provided for update");
             }
 
-            logger.info("Usuário atualizado com sucesso. ID: {}", userId);
+            existingUser.setUpdatedAt(now);
             return existingUser;
 
         } catch (DataAccessException e) {
             logger.error("ERRO DE BANCO DE DADOS ao atualizar usuário ID: {}", userId, e);
 
-            // Log detalhado para SQLException
             if (e.getCause() instanceof SQLException sqlEx) {
                 logger.error("SQL State: {}", sqlEx.getSQLState());
                 logger.error("Error Code: {}", sqlEx.getErrorCode());
