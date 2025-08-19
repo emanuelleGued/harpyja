@@ -12,6 +12,10 @@ import com.project.harpyja.service.auth.JwtUtil;
 import com.project.harpyja.service.project.ProjectService;
 import com.project.harpyja.service.user.project.UserProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.project.harpyja.utils.HashGenerator.generateHashKey;
 
@@ -126,54 +129,47 @@ public class ProjectController {
           -H "Content-Type: application/json"
      */
     @GetMapping("/my-projects")
-    public ResponseEntity<?> getUserProjects(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getUserProjects(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String name) {
+
         try {
+            // Validação do token (mantenha seu código existente)
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Authorization header is required and must be Bearer token");
             }
-
             String token = authHeader.substring(7);
             if (!jwtUtil.validateToken(token)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
             }
-
             String userId = jwtUtil.extractUserId(token);
-            if (userId == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid user claims");
-            }
 
-            List<Project> projects = projectService.getUserProjects(userId);
+            // Adiciona paginação
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Project> projectsPage = projectService.getUserProjects(userId, type, name, pageable);
 
-            List<UserProjectResponse> response = projects.stream()
-                    .map(project -> {
-                        /*
-                        ProjectRole role = project.getUsers().stream()
-                                .filter(up -> up.getUser().getId().equals(userUuid))
-                                .findFirst()
-                                .map(UserProject::getRole)
-                                .orElse(ProjectRole.VIEWER);
-                         */
-
-                        return new UserProjectResponse(
-                                project.getId(),
-                                project.getName(),
-                                project.getKey(),
-                                project.getType(),
-                                project.getExpiration(),
-                                null
-                        );
-                    })
-                    .collect(Collectors.toList());
+            // Converte para Page de DTO
+            Page<UserProjectResponse> response = projectsPage.map(project ->
+                    new UserProjectResponse(
+                            project.getId(),
+                            project.getName(),
+                            project.getKey(),
+                            project.getType(),
+                            project.getExpiration(),
+                            null // role pode ser ajustado conforme sua lógica
+                    )
+            );
 
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body("Error fetching user projects: " + e.getMessage());
         }
     }
-
     /*
     curl -X GET http://localhost:8080/api/projects/{projectId}/details \
      -H "Authorization: Bearer seu_token_jwt_aqui" \
