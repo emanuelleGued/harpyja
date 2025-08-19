@@ -2,6 +2,8 @@ package com.project.harpyja.service.user;
 
 import com.project.harpyja.entity.User;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -24,4 +26,7 @@ public interface UserService {
     User findUserByEmailServiceOnboarding(String email);
 
     User findUserByEmail(String email) throws EntityNotFoundException;
+
+    Page<User> findAllUsers(Pageable pageable, String name, String email);
+
 }

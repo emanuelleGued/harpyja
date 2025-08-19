@@ -3,6 +3,8 @@ package com.project.harpyja.service.project;
 import com.project.harpyja.entity.Project;
 import com.project.harpyja.repository.project.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,4 +35,11 @@ public class ProjectServiceImplJPA implements ProjectService {
         //TODO
         return Optional.empty();
     }
+
+    @Override
+    public Page<Project> getUserProjects(String userId, String type, String name, Pageable pageable) {
+        return projectRepository.findByUserAndFilters(userId, type, name, pageable);
+    }
+
+
 }

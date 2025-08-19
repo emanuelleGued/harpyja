@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -15,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Transactional
@@ -204,4 +208,65 @@ public class UserServiceImplJDBC implements UserService {
             throw new EntityNotFoundException("User not found with email: " + email);
         }
     }
+
+
+    @Override
+    public Page<User> findAllUsers(Pageable pageable, String name, String email) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (name != null && !name.isEmpty()) {
+            sql.append(" AND LOWER(name) LIKE LOWER(?)");
+            params.add("%" + name + "%");
+        }
+
+        if (email != null && !email.isEmpty()) {
+            sql.append(" AND LOWER(email) LIKE LOWER(?)");
+            params.add("%" + email + "%");
+        }
+
+        if (pageable.getSort().isSorted()) {
+            sql.append(" ORDER BY ");
+            pageable.getSort().forEach(order -> {
+                sql.append(order.getProperty())
+                        .append(" ")
+                        .append(order.getDirection().name());
+            });
+        } else {
+            sql.append(" ORDER BY created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(pageable.getPageSize());
+        params.add(pageable.getOffset());
+
+        List<User> users = jdbcTemplate.query(
+                sql.toString(),
+                params.toArray(),
+                userRowMapper
+        );
+
+        long total = countUsersWithFilters(name, email);
+
+        return new PageImpl<>(users, pageable, total);
+    }
+
+    private long countUsersWithFilters(String name, String email) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (name != null && !name.isEmpty()) {
+            sql.append(" AND LOWER(name) LIKE LOWER(?)");
+            params.add("%" + name + "%");
+        }
+
+        if (email != null && !email.isEmpty()) {
+            sql.append(" AND LOWER(email) LIKE LOWER(?)");
+            params.add("%" + email + "%");
+        }
+
+        return jdbcTemplate.queryForObject(sql.toString(), params.toArray(), Long.class);
+    }
+
+
 }

@@ -4,16 +4,16 @@ import com.project.harpyja.entity.Project;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public class ProjectRepositoryJDBC {
@@ -87,4 +87,82 @@ public class ProjectRepositoryJDBC {
             return Optional.empty();
         }
     }
+
+
+    public Page<Project> findByUserAndFilters(String userId, String type, String name, Pageable pageable) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT p.* FROM projects p
+        JOIN user_project up ON p.id = up.project_id
+        WHERE up.user_id = ?
+        """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND p.type = ?");
+            params.add(type);
+        }
+        if (name != null && !name.isEmpty()) {
+            sql.append(" AND LOWER(p.name) LIKE LOWER(?)");
+            params.add("%" + name + "%");
+        }
+
+        if (pageable.getSort().isSorted()) {
+            sql.append(" ORDER BY ");
+            pageable.getSort().forEach(order -> {
+                sql.append(order.getProperty())
+                        .append(" ")
+                        .append(order.getDirection().name());
+            });
+        } else {
+            sql.append(" ORDER BY p.created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(pageable.getPageSize());
+        params.add(pageable.getOffset());
+
+        List<Project> projects = jdbcTemplate.query(
+                sql.toString(),
+                params.toArray(),
+                projectRowMapper
+        );
+
+        long total = countByUserAndFilters(userId, type, name);
+
+        return new PageImpl<>(projects, pageable, total);
+    }
+
+    public long countByUserAndFilters(String userId, String type, String name) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(p.id) FROM projects p
+        JOIN user_project up ON p.id = up.project_id
+        WHERE up.user_id = ?
+        """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(userId);
+
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND p.type = ?");
+            params.add(type);
+        }
+        if (name != null && !name.isEmpty()) {
+            sql.append(" AND LOWER(p.name) LIKE LOWER(?)");
+            params.add("%" + name + "%");
+        }
+
+        try {
+            return jdbcTemplate.queryForObject(
+                    sql.toString(),
+                    params.toArray(),
+                    Long.class
+            );
+        } catch (DataAccessException e) {
+            logger.error("Erro ao contar projetos: {}", e.getMessage(), e);
+            return 0;
+        }
+    }
+
 }

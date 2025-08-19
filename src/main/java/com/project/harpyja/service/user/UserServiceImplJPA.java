@@ -4,6 +4,8 @@ import com.project.harpyja.entity.User;
 import com.project.harpyja.repository.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -86,5 +88,14 @@ public class UserServiceImplJPA implements UserService {
     public User findUserByEmail(String email) throws EntityNotFoundException {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+    }
+
+    @Override
+    public Page<User> findAllUsers(Pageable pageable, String name, String email) {
+        if ((name == null || name.isEmpty()) && (email == null || email.isEmpty())) {
+            return userRepository.findAll(pageable);
+        }
+
+        return userRepository.findByFilters(name, email, pageable);
     }
 }

@@ -2,11 +2,20 @@ package com.project.harpyja.controller;
 
 import com.project.harpyja.entity.User;
 import com.project.harpyja.service.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name= "Users", description = "Operações relacionadas a usuários")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -14,10 +23,39 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Operation(
+            summary = "Listar usuários com paginação",
+            description = "Retorna uma lista paginada de usuários com filtros opcionais",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuários encontrados"),
+                    @ApiResponse(responseCode = "400", description = "Parâmetros inválidos")
+            }
+    )
+
+
     // GET /api/users
     @GetMapping
-    public ResponseEntity<?> getAllUsers() {
-        return ResponseEntity.ok(userService.findAllUsers());
+    public ResponseEntity<?> getAllUsers(
+            @Parameter(description = "Número da página (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+
+            @Parameter(description = "Quantidade de itens por página", example = "10")
+            @RequestParam(defaultValue = "10") int size,
+
+            @Parameter(description = "Filtro por nome (case-insensitive)", example = "Robert")
+            @RequestParam(required = false) String name,
+
+            @Parameter(description = "Filtro por email (case-insensitive)", example = "test")
+            @RequestParam(required = false) String email,
+
+            @Parameter(description = "Campo para ordenação", example = "name,asc")
+            @RequestParam(defaultValue = "name,asc") String[] sort) {
+
+        Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
+
+        Page<User> users = userService.findAllUsers(pageable, name, email);
+        return ResponseEntity.ok(users);
     }
 
     // GET /api/users/{id}
