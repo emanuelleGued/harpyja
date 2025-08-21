@@ -9,6 +9,7 @@ import com.project.harpyja.entity.Organization;
 import com.project.harpyja.entity.User;
 import com.project.harpyja.entity.UserOrganization;
 import com.project.harpyja.entity.UserOrganizationId;
+import com.project.harpyja.exception.CustomException;
 import com.project.harpyja.model.enums.OrganizationRole;
 import com.project.harpyja.model.enums.OrganizationStatus;
 import com.project.harpyja.service.auth.JwtUtil;
@@ -17,8 +18,10 @@ import com.project.harpyja.service.onboarding.OnboardingService;
 import com.project.harpyja.service.organization.OrganizationService;
 import com.project.harpyja.service.user.UserService;
 import com.project.harpyja.service.user.organization.UserOrganizationService;
-import org.apache.coyote.BadRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,38 +33,45 @@ import java.util.UUID;
 @RequestMapping("/api/onboarding")
 public class OnboardingController {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private OrganizationService organizationService;
-
-    @Autowired
-    private UserOrganizationService userOrgService;
-
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final UserService userService;
+    private final OrganizationService organizationService;
+    private final UserOrganizationService userOrgService;
+    private final JwtUtil jwtUtil;
+    private final EmailService emailService;
+    private final OnboardingService onboardingService;
 
     @Value("${app.development-mode}")
     private String appEnv;
 
-    @Autowired
-    private EmailService emailService;
+    public OnboardingController(UserService userService, OrganizationService organizationService,
+                                UserOrganizationService userOrgService, JwtUtil jwtUtil,
+                                EmailService emailService, OnboardingService onboardingService) {
+        this.userService = userService;
+        this.organizationService = organizationService;
+        this.userOrgService = userOrgService;
+        this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
+        this.onboardingService = onboardingService;
+    }
 
-    @Autowired
-    private OnboardingService onboardingService;
+    @Operation(summary = "Create a registration intention",
+            description = "Starts onboarding by creating a user and organization with pending email verification",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Registration intention created successfully",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AccountRegisterResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid request (e.g., email already exists)")
+            })
+    @PostMapping("/intention")
+    public ResponseEntity<?> registrationIntentionOnboarding(@RequestBody IntentionAccountRegisterRequest accountRegister) {
 
-    /**
-     * POST /api/onboarding/intention
-     * Cria intenção de registro: cria Organization (PendingVerification), cria User (email/password), etc.
-     */
-    @PostMapping(value = "/intention")
-    public ResponseEntity<?> registrationIntentionOnboarding(
-            @RequestBody IntentionAccountRegisterRequest accountRegister) {
+        if (accountRegister.getEmail() == null || accountRegister.getEmail().isEmpty() ||
+                accountRegister.getPassword() == null || accountRegister.getPassword().isEmpty()) {
+            throw new CustomException("Email and password are required", 400);
+        }
+
         try {
             userService.findUserByEmailServiceOnboarding(accountRegister.getEmail());
 
-            // 2. Cria Organization com status = PENDING_VERIFICATION
             Organization org = new Organization();
             org.setId(UUID.randomUUID().toString());
             org.setName(null);
@@ -71,10 +81,9 @@ public class OnboardingController {
 
             Organization createdOrg = organizationService.createOrganizationService(org);
 
-            // 3. Cria User com email/password, emailVerified=false
             User user = new User();
             user.setId(UUID.randomUUID().toString());
-            user.setName(null); // perguntar a hugo
+            user.setName(null);
             user.setEmail(accountRegister.getEmail());
             user.setPassword(PasswordUtil.hashPassword(accountRegister.getPassword()));
             user.setEmailVerified(false);
@@ -87,8 +96,6 @@ public class OnboardingController {
                     createdOrg.getId(),
                     createdUser.getId()
             );
-
-            //emailService.sendVerificationEmail(createdUser.getEmail(), token);
 
             UserOrganizationId userOrgId = new UserOrganizationId();
             userOrgId.setUserId(createdUser.getId());
@@ -108,52 +115,46 @@ public class OnboardingController {
                     token,
                     appEnv
             );
+
             return ResponseEntity.status(201).body(response);
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            throw new CustomException(e.getMessage(), 400);
         }
     }
 
+    @Operation(summary = "Verify user email",
+            description = "Validates email verification token and activates user account",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Email verified successfully",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = VerifyEmailResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid or expired token")
+            })
     @GetMapping("/verify/{token}")
     public ResponseEntity<?> verifyEmail(@PathVariable String token) {
-        try {
-            if (token == null || token.isEmpty()) {
-                throw new BadRequestException("Token is required");
-            }
-            JwtUtil.VerifiedEmailToken verifiedToken = jwtUtil.verifyEmailToken(token);
 
-            String email = verifiedToken.getEmail();
-            String organizationId = verifiedToken.getOrganizationId();
-            String userId = verifiedToken.getUserId();
-
-            if (organizationId == null || userId == null) {
-                throw new BadRequestException("Failed to extract claims from token");
-            }
-
-            User foundUser = userService.updateEmailVerified(email);
-
-            if (foundUser == null) {
-                throw new BadRequestException("User not found");
-            }
-
-            String authToken = jwtUtil.generateAuthToken(foundUser);
-
-            VerifyEmailResponse response = new VerifyEmailResponse(
-                    organizationId,
-                    userId,
-                    foundUser,
-                    authToken,
-                    "" // projectKey pode ser adicionado se necessário
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (BadRequestException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid or expired token");
+        if (token == null || token.isEmpty()) {
+            throw new CustomException("Token is required", 400);
         }
+
+        JwtUtil.VerifiedEmailToken verifiedToken = jwtUtil.verifyEmailToken(token);
+
+        User foundUser = userService.updateEmailVerified(verifiedToken.getEmail());
+        if (foundUser == null) {
+            throw new CustomException("User not found", 400);
+        }
+
+        String authToken = jwtUtil.generateAuthToken(foundUser);
+
+        VerifyEmailResponse response = new VerifyEmailResponse(
+                verifiedToken.getOrganizationId(),
+                verifiedToken.getUserId(),
+                foundUser,
+                authToken,
+                ""
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/complete-registration/{organization_id}/{user_id}")
@@ -162,30 +163,21 @@ public class OnboardingController {
             @PathVariable("user_id") String userId,
             @RequestBody AccountRegisterRequest accountRegister) {
 
-        try {
-            if (organizationId == null || organizationId.isEmpty()) {
-                return ResponseEntity.badRequest().body("organization_id is required");
-            }
-
-            if (userId == null || userId.isEmpty()) {
-                return ResponseEntity.badRequest().body("user_id is required");
-            }
-
-            if (accountRegister.getOrganizationName() == null || accountRegister.getOrganizationName().isEmpty()) {
-                return ResponseEntity.badRequest().body("Organization name is required");
-            }
-            if (accountRegister.getUserName() == null || accountRegister.getUserName().isEmpty()) {
-                return ResponseEntity.badRequest().body("User name is required");
-            }
-
-            onboardingService.processRegistration(organizationId, userId, accountRegister);
-
-            return ResponseEntity.noContent().build();
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error completing registration: " + e.getMessage());
+        if (organizationId == null || organizationId.isEmpty()) {
+            throw new CustomException("organization_id is required", 400);
         }
+        if (userId == null || userId.isEmpty()) {
+            throw new CustomException("user_id is required", 400);
+        }
+        if (accountRegister.getOrganizationName() == null || accountRegister.getOrganizationName().isEmpty()) {
+            throw new CustomException("Organization name is required", 400);
+        }
+        if (accountRegister.getUserName() == null || accountRegister.getUserName().isEmpty()) {
+            throw new CustomException("User name is required", 400);
+        }
+
+        onboardingService.processRegistration(organizationId, userId, accountRegister);
+
+        return ResponseEntity.noContent().build();
     }
 }

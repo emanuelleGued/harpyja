@@ -32,9 +32,9 @@ public class ProjectServiceImplJPA implements ProjectService {
 
     @Override
     public Optional<Project> getProjectById(String projectId) {
-        //TODO
-        return Optional.empty();
+        return projectRepository.findById(projectId);
     }
+
 
     @Override
     public Page<Project> getUserProjects(String userId, String type, String name, Pageable pageable) {
