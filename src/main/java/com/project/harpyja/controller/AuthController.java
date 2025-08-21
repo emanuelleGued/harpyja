@@ -10,11 +10,9 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,82 +24,65 @@ public class AuthController {
     private final AuthService authService;
     private final JwtUtil jwtUtil;
 
-    @Autowired
     public AuthController(AuthService authService, JwtUtil jwtUtil) {
         this.authService = authService;
         this.jwtUtil = jwtUtil;
     }
 
-    /**
-     * POST /api/auth/login
-     */
-    @Operation(summary = "Autentica um usuário",
-            description = "Realiza o login do usuário com e-mail e senha, retornando dados do usuário e um token JWT em caso de sucesso.",
+    @Operation(summary = "Authenticate user",
+            description = "Performs user login with email and password, returning user data and JWT token",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Login bem-sucedido",
+                    @ApiResponse(responseCode = "200", description = "Login successful",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserWithTokenDto.class))),
-                    @ApiResponse(responseCode = "400", description = "E-mail ou senha não fornecidos"),
-                    @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+                    @ApiResponse(responseCode = "400", description = "Email or password not provided"),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials")
             })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
-            throw new CustomException("Email e senha são obrigatórios", 400);
+        if (loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty() ||
+                loginRequest.getPassword() == null || loginRequest.getPassword().isEmpty()) {
+            throw new CustomException("Email and password are required", HttpStatus.BAD_REQUEST.value());
         }
 
         UserWithTokenDto userWithToken = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
         return ResponseEntity.ok(userWithToken);
     }
 
-    /**
-     * GET /api/auth/verify-email/{token}
-     */
-    @Operation(summary = "Verifica um token de e-mail",
-            description = "Valida um token genérico (ex: de verificação de e-mail) e retorna as informações contidas nele.",
+    @Operation(summary = "Verify email token",
+            description = "Validates a generic token (e.g., email verification) and returns its information",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Token válido",
+                    @ApiResponse(responseCode = "200", description = "Valid token",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = VerifyEmailResponse.class))),
-                    @ApiResponse(responseCode = "400", description = "Token inválido ou expirado")
+                    @ApiResponse(responseCode = "400", description = "Invalid or expired token")
             })
     @GetMapping("/verify-email/{token}")
-    public ResponseEntity<?> verifyEmail(@Parameter(description = "Token a ser verificado", required = true) @PathVariable("token") String token) {
+    public ResponseEntity<?> verifyEmail(@PathVariable("token") String token) {
+
         if (token == null || token.isEmpty()) {
-            return ResponseEntity.badRequest().body("Token is required");
+            throw new CustomException("Token is required", HttpStatus.BAD_REQUEST.value());
         }
 
         try {
-            // Faz parse do token
             Jws<Claims> claimsJws = jwtUtil.parseToken(token);
             Claims claims = claimsJws.getBody();
 
-            // Pega as claims do token
             String organizationId = (String) claims.get("organizationId");
             String userId = (String) claims.get("userId");
-            String email = (String) claims.get("email");
 
-            // Exemplo “buscar user no banco e gerar outro token de sessão”
-            // Você pode aproveitar o AuthService ou outro service
-            // A lógica exata depende de como você guarda “organizationId”, “projectKey”, etc.
-
-            // Exemplo fictício de gerar um token usando o userId
             String newAuthToken = jwtUtil.generateToken(userId);
 
-            // Monte a resposta
             VerifyEmailResponse response = new VerifyEmailResponse(
                     organizationId,
                     userId,
-                    null,         // se quiser retornar o User, busque no repo
+                    null,
                     newAuthToken,
-                    ""            // se tiver projectKey, popule aqui
+                    ""
             );
 
             return ResponseEntity.ok(response);
 
         } catch (JwtException e) {
-            // Token inválido ou expirado
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Invalid or expired token: " + e.getMessage());
+            throw new CustomException("Invalid or expired token: " + e.getMessage(), HttpStatus.BAD_REQUEST.value());
         }
     }
 }

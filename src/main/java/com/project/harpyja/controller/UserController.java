@@ -1,4 +1,3 @@
-
 package com.project.harpyja.controller;
 
 import com.project.harpyja.dto.request.UserRequest;
@@ -19,10 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 import jakarta.validation.Valid;
 
-@Tag(name= "Users", description = "Operações relacionadas a usuários")
+@Tag(name= "Users", description = "Operations related to users")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -30,23 +28,23 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @Operation(summary = "Listar usuários com paginação",
-            description = "Retorna uma lista paginada de usuários com filtros opcionais",
+    @Operation(summary = "List users with pagination",
+            description = "Returns a paginated list of users with optional filters",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Usuários encontrados"),
-                    @ApiResponse(responseCode = "400", description = "Parâmetros inválidos")
+                    @ApiResponse(responseCode = "200", description = "Users found"),
+                    @ApiResponse(responseCode = "400", description = "Invalid parameters")
             })
     @GetMapping
     public ResponseEntity<?> getAllUsers(
-            @Parameter(description = "Número da página (0-based)", example = "0")
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Quantidade de itens por página", example = "10")
+            @Parameter(description = "Number of items per page", example = "10")
             @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "Filtro por nome (case-insensitive)", example = "Robert")
+            @Parameter(description = "Filter by name (case-insensitive)", example = "Robert")
             @RequestParam(required = false) String name,
-            @Parameter(description = "Filtro por email (case-insensitive)", example = "test")
+            @Parameter(description = "Filter by email (case-insensitive)", example = "test")
             @RequestParam(required = false) String email,
-            @Parameter(description = "Campo para ordenação", example = "name,asc")
+            @Parameter(description = "Sort field and direction", example = "name,asc")
             @RequestParam(defaultValue = "name,asc") String[] sort) {
 
         Sort.Direction direction = sort[1].equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
@@ -56,67 +54,67 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @Operation(summary = "Buscar usuário por ID",
-            description = "Retorna os dados de um usuário específico a partir do seu ID.",
+    @Operation(summary = "Get user by ID",
+            description = "Returns user details by ID",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Usuário encontrado",
+                    @ApiResponse(responseCode = "200", description = "User found",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+                    @ApiResponse(responseCode = "404", description = "User not found")
             })
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@Parameter(description = "ID do usuário a ser buscado", required = true)
+    public ResponseEntity<?> getUserById(@Parameter(description = "ID of the user to find", required = true)
                                          @PathVariable("id") String id) {
         User user = userService.findUserById(id);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found by ID");
         }
         return ResponseEntity.ok(user);
     }
 
-    @Operation(summary = "Deletar um usuário",
-            description = "Remove um usuário do sistema a partir do seu ID.",
+    @Operation(summary = "Delete a user",
+            description = "Deletes a user by ID",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso"),
-                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+                    @ApiResponse(responseCode = "200", description = "User deleted successfully"),
+                    @ApiResponse(responseCode = "404", description = "User not found")
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable("id") String id) {
         User user = userService.findUserById(id);
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found by ID");
         }
         userService.deleteUser(id);
-        return ResponseEntity.ok().body("Usuário deletado");
+        return ResponseEntity.ok().body("User deleted successfully");
     }
 
-    @Operation(summary = "Criar um novo usuário",
-            description = "Cadastra um novo usuário no sistema.",
+    @Operation(summary = "Create a new user",
+            description = "Registers a new user",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso",
+                    @ApiResponse(responseCode = "201", description = "User created successfully",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "400", description = "Dados inválidos")
+                    @ApiResponse(responseCode = "400", description = "Invalid data")
             })
     @PostMapping
     public ResponseEntity<?> createUser(@Valid @RequestBody UserRequest userRequest) {
         if (userService.emailExists(userRequest.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email já cadastrado");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
         }
         User created = userService.createUser(userRequest.toUser());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @Operation(summary = "Verificar o e-mail de um usuário",
-            description = "Atualiza o status de um usuário para 'e-mail verificado'.",
+    @Operation(summary = "Verify user email",
+            description = "Updates user's status to 'email verified'",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "E-mail do usuário verificado com sucesso",
+                    @ApiResponse(responseCode = "200", description = "Email verified successfully",
                             content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+                    @ApiResponse(responseCode = "404", description = "User not found with provided email")
             })
     @PutMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
         User updated = userService.updateEmailVerified(email);
         if (updated == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado com o e-mail fornecido");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with provided email");
         }
         return ResponseEntity.ok(updated);
     }
