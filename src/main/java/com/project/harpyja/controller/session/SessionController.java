@@ -3,6 +3,9 @@ package com.project.harpyja.controller.session;
 import com.project.harpyja.model.nymphicus.Session;
 import com.project.harpyja.service.auth.JwtUtil;
 import com.project.harpyja.service.session.SessionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,15 @@ public class SessionController {
         this.jwtUtil = jwtUtil;
     }
 
+    @Operation(summary = "Obtém sessões por chave de projeto",
+            description = "Retorna uma lista de sessões associadas a uma chave de projeto específica. Requer autenticação via token Bearer.",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Sessões encontradas"),
+                    @ApiResponse(responseCode = "400", description = "Chave do projeto não fornecida"),
+                    @ApiResponse(responseCode = "401", description = "Token de autorização inválido ou ausente"),
+                    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+            })
     @GetMapping("/get/{project_key}")
     public ResponseEntity<?> getSession(
             @PathVariable("project_key") String projectKey,

@@ -4,6 +4,8 @@ import com.project.harpyja.entity.User;
 import com.project.harpyja.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // GET /api/users
     @Operation(
             summary = "Listar usuários com paginação",
             description = "Retorna uma lista paginada de usuários com filtros opcionais",
@@ -31,9 +34,6 @@ public class UserController {
                     @ApiResponse(responseCode = "400", description = "Parâmetros inválidos")
             }
     )
-
-
-    // GET /api/users
     @GetMapping
     public ResponseEntity<?> getAllUsers(
             @Parameter(description = "Número da página (0-based)", example = "0")
@@ -59,14 +59,32 @@ public class UserController {
     }
 
     // GET /api/users/{id}
+    @Operation(
+            summary = "Buscar usuário por ID",
+            description = "Retorna os dados de um usuário específico a partir do seu ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuário encontrado",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+            }
+    )
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@PathVariable("id") String id) {
-        // Se seu ID for "Long", troque para (long id)
+    public ResponseEntity<?> getUserById(@Parameter(description = "ID do usuário a ser buscado", required = true)
+                                             @PathVariable("id") String id) {
         User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
 
     // POST /api/users
+    @Operation(
+            summary = "Criar um novo usuário",
+            description = "Cadastra um novo usuário no sistema.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Usuário criado com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos (ex: e-mail já existe, campos em branco)")
+            }
+    )
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
 
@@ -108,15 +126,33 @@ public class UserController {
     }
 
     // DELETE /api/users/{id}
+    @Operation(
+            summary = "Deletar um usuário",
+            description = "Remove um usuário do sistema a partir do seu ID.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Usuário deletado com sucesso"),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+            }
+    )
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable("id") String id) {
+    public ResponseEntity<?> deleteUser(@Parameter(description = "ID do usuário a ser deletado", required = true)
+                                            @PathVariable("id") String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok().body("User deleted");
     }
 
-    // Exemplo de endpoint para "updateEmailVerified"
+    @Operation(
+            summary = "Verificar o e-mail de um usuário",
+            description = "Atualiza o status de um usuário para 'e-mail verificado'.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "E-mail do usuário verificado com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
+                    @ApiResponse(responseCode = "404", description = "Usuário não encontrado com o e-mail fornecido")
+            }
+    )
     @PutMapping("/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam("email") String email) {
+    public ResponseEntity<?> verifyEmail(@Parameter(description = "E-mail do usuário a ser verificado", required = true)
+                                             @RequestParam("email") String email) {
         User updated = userService.updateEmailVerified(email);
         return ResponseEntity.ok(updated);
     }

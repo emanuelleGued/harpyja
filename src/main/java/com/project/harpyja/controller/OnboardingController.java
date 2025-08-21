@@ -17,6 +17,11 @@ import com.project.harpyja.service.onboarding.OnboardingService;
 import com.project.harpyja.service.organization.OrganizationService;
 import com.project.harpyja.service.user.UserService;
 import com.project.harpyja.service.user.organization.UserOrganizationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,6 +60,13 @@ public class OnboardingController {
      * POST /api/onboarding/intention
      * Cria intenção de registro: cria Organization (PendingVerification), cria User (email/password), etc.
      */
+    @Operation(summary = "Cria uma intenção de registro",
+            description = "Inicia o processo de onboarding criando um usuário e organização com status pendente de verificação por e-mail.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Intenção de registro criada com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AccountRegisterResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Requisição inválida (ex: e-mail já existe)")
+            })
     @PostMapping(value = "/intention")
     public ResponseEntity<?> registrationIntentionOnboarding(
             @RequestBody IntentionAccountRegisterRequest accountRegister) {
@@ -115,8 +127,15 @@ public class OnboardingController {
         }
     }
 
+    @Operation(summary = "Verifica o e-mail do usuário",
+            description = "Valida o token enviado por e-mail para confirmar o registro do usuário e ativar a conta.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "E-mail verificado com sucesso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = VerifyEmailResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Token inválido ou expirado")
+            })
     @GetMapping("/verify/{token}")
-    public ResponseEntity<?> verifyEmail(@PathVariable String token) {
+    public ResponseEntity<?> verifyEmail(@Parameter(description = "Token de verificação recebido por e-mail", required = true) @PathVariable String token) {
         try {
             if (token == null || token.isEmpty()) {
                 throw new BadRequestException("Token is required");
@@ -156,9 +175,19 @@ public class OnboardingController {
         }
     }
 
+    @Operation(summary = "Completa o registro do usuário e organização",
+            description = "Após a verificação do e-mail, este endpoint finaliza o registro fornecendo os nomes do usuário e da organização.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Registro completado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados obrigatórios ausentes"),
+                    @ApiResponse(responseCode = "404", description = "Usuário ou organização não encontrados"),
+                    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+            })
     @PostMapping("/complete-registration/{organization_id}/{user_id}")
     public ResponseEntity<?> completeRegistration(
+            @Parameter(description = "ID da organização a ser atualizada", required = true)
             @PathVariable("organization_id") String organizationId,
+            @Parameter(description = "ID do usuário a ser atualizado", required = true)
             @PathVariable("user_id") String userId,
             @RequestBody AccountRegisterRequest accountRegister) {
 

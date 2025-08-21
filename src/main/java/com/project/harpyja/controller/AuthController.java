@@ -9,6 +9,11 @@ import com.project.harpyja.service.auth.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +35,14 @@ public class AuthController {
     /**
      * POST /api/auth/login
      */
+    @Operation(summary = "Autentica um usuário",
+            description = "Realiza o login do usuário com e-mail e senha, retornando dados do usuário e um token JWT em caso de sucesso.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Login bem-sucedido",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserWithTokenDto.class))),
+                    @ApiResponse(responseCode = "400", description = "E-mail ou senha não fornecidos"),
+                    @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+            })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         if (loginRequest.getEmail() == null || loginRequest.getPassword() == null) {
@@ -43,8 +56,15 @@ public class AuthController {
     /**
      * GET /api/auth/verify-email/{token}
      */
+    @Operation(summary = "Verifica um token de e-mail",
+            description = "Valida um token genérico (ex: de verificação de e-mail) e retorna as informações contidas nele.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Token válido",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = VerifyEmailResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Token inválido ou expirado")
+            })
     @GetMapping("/verify-email/{token}")
-    public ResponseEntity<?> verifyEmail(@PathVariable("token") String token) {
+    public ResponseEntity<?> verifyEmail(@Parameter(description = "Token a ser verificado", required = true) @PathVariable("token") String token) {
         if (token == null || token.isEmpty()) {
             return ResponseEntity.badRequest().body("Token is required");
         }

@@ -11,6 +11,9 @@ import com.project.harpyja.repository.nymphicus.session.SessionRepositoryImpl;
 import com.project.harpyja.service.auth.JwtUtil;
 import com.project.harpyja.service.project.ProjectService;
 import com.project.harpyja.service.user.project.UserProjectService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,10 +52,21 @@ public class ProjectController {
         this.sessionRepository = sessionRepository;
     }
 
+    @Operation(
+            summary = "Cria um novo projeto",
+            description = "Cria um novo projeto associado a uma organização. O usuário autenticado se torna o administrador do projeto.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Projeto criado com sucesso"),
+                    @ApiResponse(responseCode = "400", description = "Dados inválidos ou organização não encontrada"),
+                    @ApiResponse(responseCode = "401", description = "Não autorizado")
+            }
+    )
     @PostMapping("/create/{organizationId}")
     public ResponseEntity<?> createProject(
+            @Parameter(description = "ID da organização à qual o projeto pertencerá", required = true)
             @PathVariable String organizationId,
             @RequestBody CreateProjectRequest createProjectRequest,
+            @Parameter(hidden = true)
             @RequestHeader("Authorization") String authHeader) {
 
         try {
@@ -128,12 +142,26 @@ public class ProjectController {
           -H "Authorization: Bearer SEU_TOKEN_AQUI" \
           -H "Content-Type: application/json"
      */
+    @Operation(
+            summary = "Lista os projetos do usuário autenticado",
+            description = "Retorna uma lista paginada dos projetos aos quais o usuário autenticado tem acesso, com opções de filtro.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Projetos listados com sucesso"),
+                    @ApiResponse(responseCode = "401", description = "Não autorizado"),
+                    @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+            }
+    )
     @GetMapping("/my-projects")
     public ResponseEntity<?> getUserProjects(
+            @Parameter(hidden = true)
             @RequestHeader("Authorization") String authHeader,
+            @Parameter(description = "Número da página (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Quantidade de itens por página", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Filtrar por tipo de projeto")
             @RequestParam(required = false) String type,
+            @Parameter(description = "Filtrar por nome do projeto (case-insensitive)")
             @RequestParam(required = false) String name) {
 
         try {
@@ -175,9 +203,21 @@ public class ProjectController {
      -H "Authorization: Bearer seu_token_jwt_aqui" \
      -H "Content-Type: application/json"
      */
+    @Operation(
+            summary = "Obtém detalhes de um projeto específico",
+            description = "Retorna informações detalhadas de um projeto, incluindo suas sessões, se o usuário autenticado tiver permissão de acesso.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Detalhes do projeto encontrados"),
+                    @ApiResponse(responseCode = "401", description = "Não autorizado"),
+                    @ApiResponse(responseCode = "403", description = "Acesso negado ao projeto"),
+                    @ApiResponse(responseCode = "404", description = "Projeto não encontrado")
+            }
+    )
     @GetMapping("/{projectId}/details")
     public ResponseEntity<?> getProjectDetails(
+            @Parameter(description = "ID do projeto a ser detalhado", required = true)
             @PathVariable String projectId,
+            @Parameter(hidden = true)
             @RequestHeader("Authorization") String authHeader) {
         try {
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
