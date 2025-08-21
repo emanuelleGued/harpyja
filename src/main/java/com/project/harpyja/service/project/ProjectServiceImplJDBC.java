@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,14 +28,16 @@ public class ProjectServiceImplJDBC implements ProjectService {
         return projectDAO.save(project);
     }
 
-
-
-
     @Override
     public Page<Project> getUserProjects(String userId, String type, String name, Pageable pageable) {
-        return projectDAO.findByUserAndFilters(userId, type, name, pageable);
+        return null;
     }
 
+    @Override
+    public List<Project> getUserProjects(String userId) {
+        List<Project> projects = projectDAO.findProjectsByUserId(userId);
+        return projects;
+    }
 
     @Override
     public Optional<Project> getProjectById(String projectId) {
